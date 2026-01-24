@@ -80,6 +80,7 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
       case 'SMALLGROUP': setSmallGroups(prev => isNew ? [finalData, ...prev] : prev.map(sg => String(sg.id) === String(finalData.id) ? finalData : sg)); break;
       case 'PRAISE_TEAM': setPraiseTeams(prev => isNew ? [...prev, finalData] : prev.map(pt => String(pt.id) === String(finalData.id) ? finalData : pt)); break;
       case 'PRAISE_BAND': setPraiseBands(prev => isNew ? [...prev, finalData] : prev.map(pb => String(pb.id) === String(finalData.id) ? finalData : pb)); break;
+      case 'RESERVATION': setReservations(prev => isNew ? [finalData, ...prev] : prev.map(r => String(r.id) === String(finalData.id) ? finalData : r)); break;
     }
     setEditModal(null);
   };
@@ -89,9 +90,34 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
       case 'RESERVATION':
         return (
           <div className="flex flex-col gap-4 animate-in fade-in">
-            <SectionHeader title="예약 신청 관리" count={reservations.length} onDeleteAll={() => handleDeleteAll('RESERVATION')} />
+            <SectionHeader
+              title="예약 신청 관리"
+              count={reservations.length}
+              onAdd={() => setEditModal({
+                type: 'RESERVATION',
+                item: {
+                  applicantName: '',
+                  roomName: '비전홀',
+                  date: '2026-01-01',
+                  startTime: '10:00',
+                  endTime: '12:00',
+                  purpose: '',
+                  status: 'APPROVED',
+                  headcount: 10,
+                  roomId: '1',
+                  createdAt: new Date().toISOString()
+                }
+              })}
+              onDeleteAll={() => handleDeleteAll('RESERVATION')}
+            />
             {reservations.length > 0 ? reservations.map(res => (
-              <AdminCard key={res.id} title={`${res.applicantName} (${res.roomName})`} info={`${res.date} / ${res.startTime}~${res.endTime}`} onDelete={() => handleDelete('RESERVATION', res.id)} />
+              <AdminCard
+                key={res.id}
+                title={`${res.applicantName} (${res.roomName})`}
+                info={`${res.date} / ${res.startTime}~${res.endTime}`}
+                onEdit={() => setEditModal({ type: 'RESERVATION', item: res })}
+                onDelete={() => handleDelete('RESERVATION', res.id)}
+              />
             )) : <EmptyState icon="event_busy" message="예약 정보가 비어있습니다." />}
           </div>
         );
@@ -111,6 +137,38 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
             {bulletins.map(b => (
               <AdminCard key={b.id} title={`${b.date} 주보`} info={`제 ${b.volume}호`} onEdit={() => setEditModal({ type: 'BULLETIN', item: b })} onDelete={() => handleDelete('BULLETIN', b.id)} />
             ))}
+          </div>
+        );
+      case 'SMALLGROUP':
+        return (
+          <div className="flex flex-col gap-4 animate-in fade-in">
+            <SectionHeader
+              title="소그룹 관리"
+              count={smallGroups.length}
+              onAdd={() => setEditModal({
+                type: 'SMALLGROUP',
+                item: {
+                  name: '',
+                  leader: '',
+                  category: '청년부',
+                  time: '주일 오후 2시',
+                  location: '비전센터',
+                  description: '',
+                  tags: []
+                }
+              })}
+              onDeleteAll={() => handleDeleteAll('SMALLGROUP')}
+            />
+            {smallGroups.map(sg => (
+              <AdminCard
+                key={sg.id}
+                title={sg.name}
+                info={`리더: ${sg.leader} / ${sg.time}`}
+                onEdit={() => setEditModal({ type: 'SMALLGROUP', item: sg })}
+                onDelete={() => handleDelete('SMALLGROUP', sg.id)}
+              />
+            ))}
+            {smallGroups.length === 0 && <EmptyState icon="groups" message="등록된 소그룹이 없습니다." />}
           </div>
         );
       case 'ORGANIZATION':
