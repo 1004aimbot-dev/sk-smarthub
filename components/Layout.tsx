@@ -20,7 +20,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
             onClick={() => {
               if (title === "말씀 상세") {
                 setView(ViewType.MEDIA);
+<<<<<<< HEAD
               } else if (title === "사이트맵" || title === "양육 프로그램") {
+=======
+              } else if (title === "사이트맵") {
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
                 setView(ViewType.HOME);
               } else {
                 setView(ViewType.HOME);
@@ -48,7 +52,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
         </button>
       </header>
 
+<<<<<<< HEAD
       {/* Main Content Area */}
+=======
+      {/* Main Content Area - flex-1 and overflow-hidden to allow children to handle their own scrolling if needed */}
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       <main className="flex-1 overflow-hidden relative pb-20">
         <div className="h-full overflow-y-auto no-scrollbar">
           {children}
@@ -64,10 +72,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView, 
           onClick={() => setView(ViewType.HOME)} 
         />
         <NavButton 
+<<<<<<< HEAD
           icon="school" 
           label="양육" 
           active={currentView === ViewType.PROGRAM} 
           onClick={() => setView(ViewType.PROGRAM)} 
+=======
+          icon="article" 
+          label="주보" 
+          active={currentView === ViewType.BULLETIN} 
+          onClick={() => setView(ViewType.BULLETIN)} 
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
         />
         <NavButton 
           icon="smart_display" 

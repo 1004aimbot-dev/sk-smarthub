@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { ChatMessage } from '../types';
 
+<<<<<<< HEAD
 // 오늘의 말씀 리스트 (날짜에 따라 순환)
 const DAILY_VERSES = [
   { ref: "시편 23:1", text: "여호와는 나의 목자시니 내게 부족함이 없으리로다" },
@@ -14,6 +15,8 @@ const DAILY_VERSES = [
   { ref: "로마서 8:28", text: "우리가 알거니와 하나님을 사랑하는 자 곧 그의 뜻대로 부르심을 입은 자들에게는 모든 것이 합력하여 선을 이루느니라" }
 ];
 
+=======
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
 // 진행 상태 애니메이션 컴포넌트
 const ThinkingIndicator: React.FC<{ message: string }> = ({ message }) => (
   <div className="flex flex-col items-center gap-4 py-6 px-4 animate-in fade-in zoom-in duration-700">
@@ -47,6 +50,7 @@ const FormattedMessage: React.FC<{ text: string; role: 'user' | 'model'; images?
         return <p key={i} className="text-gray-700 dark:text-gray-300 leading-relaxed font-medium">{parseBoldText(line)}</p>;
       })}
 
+<<<<<<< HEAD
       {images && images.length > 0 && (
         <div className={`grid ${images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-3 mt-4 animate-in zoom-in-95 duration-700`}>
           {images.map((img, idx) => (
@@ -55,6 +59,22 @@ const FormattedMessage: React.FC<{ text: string; role: 'user' | 'model'; images?
             </div>
           ))}
         </div>
+=======
+      {/* 이미지 렌더링 영역 - 오류 시에도 우아하게 표시 */}
+      {images && images.length > 0 ? (
+        <div className={`grid ${images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-3 mt-4 animate-in zoom-in-95 duration-700`}>
+          {images.map((img, idx) => (
+            <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-white/5 bg-gray-100 dark:bg-navy-accent">
+              <img src={img} alt="Bible Illustration" className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+      ) : role === 'model' && text.length > 0 && (
+        <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10 flex items-center gap-3">
+           <span className="material-symbols-outlined text-primary text-sm filled">format_quote</span>
+           <p className="text-[10px] text-primary/60 font-black">묵상하신 말씀이 삶의 현장에서 능력으로 나타나길 기도합니다.</p>
+        </div>
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       )}
     </div>
   );
@@ -77,6 +97,7 @@ export const AIChatScreen: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
+<<<<<<< HEAD
   const [dailyReflection, setDailyReflection] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -132,6 +153,22 @@ export const AIChatScreen: React.FC = () => {
       name: userName, 
       position: userPosition 
     }));
+=======
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const savedInfo = localStorage.getItem('shinkwang_user_info');
+    if (savedInfo) {
+      const parsed = JSON.parse(savedInfo);
+      setUserName(parsed.name || '');
+      setUserPosition(parsed.position || '');
+    }
+    setMessages([{ role: 'model', text: "안녕하세요 성도님! 저는 성남신광교회 성경 길잡이입니다. 오늘 무엇을 도와드릴까요?" }]);
+  }, []);
+
+  const saveUserInfo = () => {
+    localStorage.setItem('shinkwang_user_info', JSON.stringify({ name: userName, position: userPosition }));
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
   };
 
   useEffect(() => {
@@ -139,10 +176,16 @@ export const AIChatScreen: React.FC = () => {
   }, [messages, isGeneratingImages, isLoading]);
 
   const handleSend = async (text: string = input) => {
+<<<<<<< HEAD
     const trimmedText = text.trim();
     if (!trimmedText || isLoading || isGeneratingImages) return;
 
     setMessages(prev => [...prev, { role: 'user', text: trimmedText }]);
+=======
+    if (!text.trim() || isLoading || isGeneratingImages) return;
+
+    setMessages(prev => [...prev, { role: 'user', text }]);
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
     setInput('');
     setIsLoading(true);
 
@@ -150,6 +193,7 @@ export const AIChatScreen: React.FC = () => {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
+<<<<<<< HEAD
         contents: trimmedText,
         config: {
           systemInstruction: `당신은 성남신광교회 성경 길잡이입니다. 
@@ -168,6 +212,22 @@ export const AIChatScreen: React.FC = () => {
       await generateBibleIllustrations(trimmedText, responseText);
     } catch (error) {
       console.error("AI 오류:", error);
+=======
+        contents: text,
+        config: {
+          systemInstruction: `당신은 성남신광교회 성경 길잡이입니다. 사용자명: ${userName}, 직분: ${userPosition}. 성경 구절을 인용하여 따뜻하고 지혜롭게 답하세요.`,
+        }
+      });
+
+      const responseText = response.text || "말씀을 전해드리지 못해 죄송합니다. 다시 시도해 주세요.";
+      setMessages(prev => [...prev, { role: 'model', text: responseText }]);
+      setIsLoading(false);
+      
+      // 이미지 생성 시도
+      await generateBibleIllustrations(text, responseText);
+    } catch (error) {
+      console.error("AI Error:", error);
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       setIsLoading(false);
       setMessages(prev => [...prev, { role: 'model', text: "통신 오류가 발생했습니다. 성도님의 넓은 이해를 부탁드립니다." }]);
     }
@@ -177,6 +237,7 @@ export const AIChatScreen: React.FC = () => {
     setIsGeneratingImages(true);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+<<<<<<< HEAD
       const promptOptimizer = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `다음을 바탕으로 성경적인 일러스트를 위한 영어 프롬프트를 하나 만들어줘: "${userPrompt}". 
@@ -193,6 +254,32 @@ export const AIChatScreen: React.FC = () => {
           if (part.inlineData) generatedImages.push(`data:image/png;base64,${part.inlineData.data}`);
         }
       }
+=======
+      
+      // 프롬프트 최적화 시도
+      const promptOptimizer = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Create a short English image prompt for: ${userPrompt}. Focus on biblical art style. Output ONLY the prompt text.`,
+      });
+
+      const imagePrompt = promptOptimizer.text?.trim() || `Biblical illustration of ${userPrompt}`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image', // 오류 수정을 위한 모델명 확정
+        contents: { parts: [{ text: imagePrompt }] },
+        config: { imageConfig: { aspectRatio: "1:1" } }
+      });
+
+      const generatedImages: string[] = [];
+      if (response.candidates?.[0]?.content?.parts) {
+        for (const part of response.candidates[0].content.parts) {
+          if (part.inlineData) {
+            generatedImages.push(`data:image/png;base64,${part.inlineData.data}`);
+          }
+        }
+      }
+
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       if (generatedImages.length > 0) {
         setMessages(prev => {
           const newMessages = [...prev];
@@ -202,7 +289,12 @@ export const AIChatScreen: React.FC = () => {
         });
       }
     } catch (error) {
+<<<<<<< HEAD
       console.error("이미지 생성 오류:", error);
+=======
+      console.error("Image Generation Error:", error);
+      // 이미지 생성 실패 시 조용히 넘어감 (FormattedMessage에서 대체 문구 표시)
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
     } finally {
       setIsGeneratingImages(false);
     }
@@ -210,6 +302,7 @@ export const AIChatScreen: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-[#F1F5F9] dark:bg-navy-dark overflow-hidden">
+<<<<<<< HEAD
       {/* 개인 프로필 입력 영역 */}
       <div className="bg-white dark:bg-navy-accent p-4 border-b border-gray-200 dark:border-white/10 z-10 shadow-sm">
         <div className="flex flex-col gap-2">
@@ -224,10 +317,17 @@ export const AIChatScreen: React.FC = () => {
               <input type="text" value={userPosition} onChange={(e) => setUserPosition(e.target.value)} onBlur={saveUserInfo} placeholder="직분 (예: 집사)" className="w-full bg-gray-50 dark:bg-navy-dark border-none rounded-xl py-2.5 pl-9 pr-3 text-xs font-bold dark:text-white focus:ring-1 focus:ring-primary shadow-inner" />
             </div>
           </div>
+=======
+      <div className="bg-white dark:bg-navy-accent p-4 border-b border-gray-200 dark:border-white/10 z-10">
+        <div className="flex gap-2">
+          <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)} onBlur={saveUserInfo} placeholder="성함" className="flex-1 bg-gray-50 dark:bg-navy-dark border-none rounded-xl p-2.5 text-xs font-bold dark:text-white" />
+          <input type="text" value={userPosition} onChange={(e) => setUserPosition(e.target.value)} onBlur={saveUserInfo} placeholder="직분" className="flex-1 bg-gray-50 dark:bg-navy-dark border-none rounded-xl p-2.5 text-xs font-bold dark:text-white" />
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6 no-scrollbar pb-10">
+<<<<<<< HEAD
         {/* 오늘의 말씀 카드 */}
         <div className="bg-gradient-to-br from-navy-dark to-navy-accent p-6 rounded-[2.5rem] shadow-xl border border-primary/20 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-1000">
           <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -253,6 +353,12 @@ export const AIChatScreen: React.FC = () => {
               msg.role === 'user' ? 'bg-primary text-navy-dark font-black rounded-tr-none shadow-md' : 'bg-white dark:bg-navy-accent text-gray-800 dark:text-gray-200 rounded-tl-none border border-gray-100 dark:border-white/5 shadow-sm'
             }`}>
               {msg.role === 'model' && !msg.text && isLoading ? <ThinkingIndicator message="말씀을 묵상하며 응답을 준비 중입니다..." /> : <FormattedMessage text={msg.text} role={msg.role} images={msg.images} />}
+=======
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] px-5 py-4 rounded-3xl text-sm ${msg.role === 'user' ? 'bg-primary text-navy-dark font-black rounded-tr-none' : 'bg-white dark:bg-navy-accent text-gray-800 dark:text-gray-200 rounded-tl-none border border-gray-100 dark:border-white/5'}`}>
+              {msg.role === 'model' && !msg.text && isLoading ? <ThinkingIndicator message="말씀을 묵상하는 중입니다..." /> : <FormattedMessage text={msg.text} role={msg.role} images={msg.images} />}
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
             </div>
           </div>
         ))}
@@ -260,6 +366,7 @@ export const AIChatScreen: React.FC = () => {
         <div ref={messagesEndRef} />
       </div>
 
+<<<<<<< HEAD
       <div className="p-4 bg-white dark:bg-navy-accent border-t border-gray-200 dark:border-white/10 shrink-0 pb-6 flex flex-col gap-4">
         {/* 샘플 대화 칩 */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar px-1">
@@ -273,6 +380,12 @@ export const AIChatScreen: React.FC = () => {
           <button onClick={() => handleSend()} disabled={isLoading || isGeneratingImages || !input.trim()} className="size-11 rounded-full flex items-center justify-center bg-primary text-navy-dark transition-all active:scale-90 disabled:opacity-30">
             <span className="material-symbols-outlined filled">send</span>
           </button>
+=======
+      <div className="p-4 bg-white dark:bg-navy-accent border-t border-gray-200 dark:border-white/10 shrink-0 pb-8">
+        <div className="flex items-center gap-2 bg-gray-50 dark:bg-navy-dark rounded-[2rem] px-5 py-1.5 border border-gray-200 dark:border-white/5 shadow-inner">
+          <input type="text" placeholder="궁금한 내용을 입력하세요..." value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} disabled={isLoading || isGeneratingImages} className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-4 dark:text-white placeholder-gray-400 font-bold" />
+          <button onClick={() => handleSend()} disabled={isLoading || isGeneratingImages || !input.trim()} className="size-11 rounded-full flex items-center justify-center bg-primary text-navy-dark"><span className="material-symbols-outlined filled">send</span></button>
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
         </div>
       </div>
     </div>

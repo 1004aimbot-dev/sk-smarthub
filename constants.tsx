@@ -1,4 +1,5 @@
 
+<<<<<<< HEAD
 import { Sermon, ArchiveItem, PastorProfile, SmallGroup, SmallGroupCategory, FloorData, PraiseTeam, Department, PraiseBand, Album, BulletinRecord, ProgramBatch } from './types';
 
 export const INITIAL_PROGRAM_BATCHES: ProgramBatch[] = [
@@ -25,6 +26,9 @@ export const INITIAL_PROGRAM_BATCHES: ProgramBatch[] = [
     participants: ['최순종'] 
   }
 ];
+=======
+import { Sermon, ArchiveItem, PastorProfile, SmallGroup, SmallGroupCategory, FloorData, PraiseTeam, Department, PraiseBand, Album, BulletinRecord } from './types';
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
 
 export const INITIAL_BULLETIN_RECORDS: BulletinRecord[] = [
   { id: 'b43', date: '2026.10.25', displayDate: '10월 25일', title: '너희는 세상의 빛이라', preacher: '이현용 담임목사', description: '성령강림후 제21주 (제 43호)', volume: '43' },
@@ -91,7 +95,11 @@ export const DEFAULT_PASTOR_PROFILE: PastorProfile = {
   name: "이현용 담임목사",
   quote: "하나님을 기쁘시게, 사람을 행복하게 하는 공동체로 여러분을 초대합니다.",
   content: "할렐루야! 성남신광교회 홈페이지를 찾아주신 모든 분들을 주님의 이름으로 사랑하고 축복합니다.",
+<<<<<<< HEAD
   image: "https://raw.githubusercontent.com/1004aimbot-dev/images/main/leehy.png" 
+=======
+  image: "https://raw.githubusercontent.com/1004aimbot-dev/images/main/이현용담임목사1.png" 
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
 };
 
 export const DEFAULT_FLOOR_DATA: FloorData[] = [

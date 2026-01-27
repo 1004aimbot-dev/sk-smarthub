@@ -13,6 +13,7 @@ export enum ViewType {
   SMALL_GROUP = 'SMALL_GROUP',
   ALBUM = 'ALBUM',
   ADMIN_LOGIN = 'ADMIN_LOGIN',
+<<<<<<< HEAD
   ADMIN_DASHBOARD = 'ADMIN_DASHBOARD',
   PROGRAM = 'PROGRAM'
 }
@@ -27,6 +28,9 @@ export interface ProgramBatch {
   startDate: string;  // 시작일
   endDate: string;    // 종료일
   participants: string[]; // 수강생 명단 추가
+=======
+  ADMIN_DASHBOARD = 'ADMIN_DASHBOARD'
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
 }
 
 export interface BulletinRecord {

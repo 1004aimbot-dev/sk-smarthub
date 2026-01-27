@@ -19,7 +19,10 @@ export const MoreScreen: React.FC<MoreScreenProps> = ({ onSermonSelect, setView 
 
   const handleMenuClick = (label: string) => {
     if (label === '교회 정보') setView?.(ViewType.SITEMAP);
+<<<<<<< HEAD
     else if (label === '온라인 주보') setView?.(ViewType.BULLETIN);
+=======
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
     else if (label === '소그룹 모임') setView?.(ViewType.SMALL_GROUP);
     else if (label === '공지사항') setView?.(ViewType.NOTICE);
     else if (label === '교회앨범') setView?.(ViewType.ALBUM);
@@ -91,7 +94,10 @@ export const MoreScreen: React.FC<MoreScreenProps> = ({ onSermonSelect, setView 
         <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest ml-1">교회 커뮤니티</h3>
         <div className="bg-white dark:bg-navy-accent rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 dark:border-white/5 divide-y divide-gray-50 dark:divide-white/5">
           <MoreMenuItem icon="church" label="교회 정보" color="text-primary" onClick={() => handleMenuClick('교회 정보')} />
+<<<<<<< HEAD
           <MoreMenuItem icon="article" label="온라인 주보" color="text-primary" onClick={() => handleMenuClick('온라인 주보')} />
+=======
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
           <MoreMenuItem icon="groups" label="소그룹 모임" color="text-primary" onClick={() => handleMenuClick('소그룹 모임')} />
           <MoreMenuItem icon="photo_library" label="교회앨범" color="text-primary" onClick={() => handleMenuClick('교회앨범')} />
           <MoreMenuItem icon="campaign" label="공지사항" color="text-primary" onClick={() => handleMenuClick('공지사항')} />
@@ -106,7 +112,11 @@ export const MoreScreen: React.FC<MoreScreenProps> = ({ onSermonSelect, setView 
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* 푸터 영역 */}
+=======
+      {/* 푸터 영역: 클릭 시 관리자 페이지로 이동 가능하도록 수정 */}
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       <div className="text-center py-6 text-[10px] text-gray-400 font-medium leading-relaxed">
         <span 
           onClick={() => setView?.(ViewType.ADMIN_LOGIN)}

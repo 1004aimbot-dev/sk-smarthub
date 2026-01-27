@@ -1,6 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { ViewType, Sermon, BulletinRecord, SmallGroup, PraiseTeam, PraiseBand, Department, ReservationData, ProgramBatch } from './types';
+=======
+import { ViewType, Sermon, BulletinRecord, SmallGroup, PraiseTeam, PraiseBand, Department, ReservationData } from './types';
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
 import { Layout } from './components/Layout';
 import { HomeScreen } from './screens/HomeScreen';
 import { BulletinScreen } from './screens/BulletinScreen';
@@ -16,6 +20,7 @@ import { SmallGroupScreen } from './screens/SmallGroupScreen';
 import { AlbumScreen } from './screens/AlbumScreen';
 import { AdminLoginScreen } from './screens/AdminLoginScreen';
 import { AdminDashboardScreen } from './screens/AdminDashboardScreen';
+<<<<<<< HEAD
 import { ProgramScreen } from './screens/ProgramScreen';
 import { 
   INITIAL_BULLETIN_RECORDS, 
@@ -27,6 +32,18 @@ import {
   INITIAL_PROGRAM_BATCHES
 } from './constants';
 
+=======
+import {
+  INITIAL_BULLETIN_RECORDS,
+  MOCK_SERMONS,
+  DEFAULT_SMALL_GROUPS,
+  DEFAULT_PRAISE_TEAMS,
+  DEFAULT_PRAISE_BANDS,
+  DEFAULT_DEPARTMENTS
+} from './constants';
+
+// [베테랑 비책] 빈 배열([])도 엄연한 데이터입니다. null일 때만 초기값을 로드합니다.
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
 const getInitialData = <T,>(key: string, defaultValue: T): T => {
   const saved = localStorage.getItem(key);
   if (saved !== null) {
@@ -44,6 +61,11 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewType>(ViewType.HOME);
   const [selectedSermon, setSelectedSermon] = useState<Sermon | null>(null);
 
+<<<<<<< HEAD
+=======
+  // 전역 상태 관리 (로컬스토리지 우선)
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => localStorage.getItem('shinkwang_is_admin') === 'true');
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
   const [sermons, setSermons] = useState<Sermon[]>(() => getInitialData('shinkwang_sermons', MOCK_SERMONS));
   const [bulletins, setBulletins] = useState<BulletinRecord[]>(() => getInitialData('shinkwang_bulletins', INITIAL_BULLETIN_RECORDS));
   const [smallGroups, setSmallGroups] = useState<SmallGroup[]>(() => getInitialData('shinkwang_small_groups', DEFAULT_SMALL_GROUPS));
@@ -51,8 +73,13 @@ const App: React.FC = () => {
   const [praiseBands, setPraiseBands] = useState<PraiseBand[]>(() => getInitialData('shinkwang_praise_bands', DEFAULT_PRAISE_BANDS));
   const [departments, setDepartments] = useState<Department[]>(() => getInitialData('shinkwang_departments', DEFAULT_DEPARTMENTS));
   const [reservations, setReservations] = useState<ReservationData[]>(() => getInitialData('shinkwang_reservations', []));
+<<<<<<< HEAD
   const [programBatches, setProgramBatches] = useState<ProgramBatch[]>(() => getInitialData('shinkwang_program_batches', INITIAL_PROGRAM_BATCHES));
 
+=======
+
+  // 상태 변화 감지 즉시 로컬스토리지 저장 (Race Condition 방지)
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
   useEffect(() => { localStorage.setItem('shinkwang_sermons', JSON.stringify(sermons)); }, [sermons]);
   useEffect(() => { localStorage.setItem('shinkwang_bulletins', JSON.stringify(bulletins)); }, [bulletins]);
   useEffect(() => { localStorage.setItem('shinkwang_small_groups', JSON.stringify(smallGroups)); }, [smallGroups]);
@@ -60,7 +87,10 @@ const App: React.FC = () => {
   useEffect(() => { localStorage.setItem('shinkwang_praise_bands', JSON.stringify(praiseBands)); }, [praiseBands]);
   useEffect(() => { localStorage.setItem('shinkwang_departments', JSON.stringify(departments)); }, [departments]);
   useEffect(() => { localStorage.setItem('shinkwang_reservations', JSON.stringify(reservations)); }, [reservations]);
+<<<<<<< HEAD
   useEffect(() => { localStorage.setItem('shinkwang_program_batches', JSON.stringify(programBatches)); }, [programBatches]);
+=======
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
 
   const handleSermonSelect = (sermon: Sermon) => {
     setSelectedSermon(sermon);
@@ -68,11 +98,31 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
+<<<<<<< HEAD
+=======
+  const handleAdminLoginSuccess = () => {
+    setIsAdmin(true);
+    localStorage.setItem('shinkwang_is_admin', 'true');
+    setView(ViewType.ADMIN_DASHBOARD);
+  };
+
+  const handleAdminLogout = () => {
+    if (window.confirm('관리자 모드에서 로그아웃 하시겠습니까?')) {
+      setIsAdmin(false);
+      localStorage.removeItem('shinkwang_is_admin');
+      setView(ViewType.ADMIN_LOGIN);
+    }
+  };
+
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
   const renderView = () => {
     switch (view) {
       case ViewType.HOME: return <HomeScreen setView={setView} />;
       case ViewType.BULLETIN: return <BulletinScreen bulletins={bulletins} />;
+<<<<<<< HEAD
       case ViewType.PROGRAM: return <ProgramScreen batches={programBatches} setBatches={setProgramBatches} />;
+=======
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       case ViewType.MEDIA: return <MediaScreen sermons={sermons} onSermonSelect={handleSermonSelect} />;
       case ViewType.MAP: return <MapScreen />;
       case ViewType.MORE: return <MoreScreen onSermonSelect={handleSermonSelect} setView={setView} />;
@@ -82,10 +132,38 @@ const App: React.FC = () => {
       case ViewType.NOTICE: return <NoticeScreen />;
       case ViewType.SMALL_GROUP: return <SmallGroupScreen />;
       case ViewType.ALBUM: return <AlbumScreen />;
+<<<<<<< HEAD
       case ViewType.ADMIN_LOGIN: return <AdminLoginScreen setView={setView} />;
       case ViewType.ADMIN_DASHBOARD: 
         return (
           <AdminDashboardScreen 
+=======
+      case ViewType.ADMIN_LOGIN:
+        if (isAdmin) {
+          // 이미 로그인된 상태라면 바로 대시보드로 이동
+          return (
+            <AdminDashboardScreen
+              setView={setView}
+              sermons={sermons} setSermons={setSermons}
+              bulletins={bulletins} setBulletins={setBulletins}
+              smallGroups={smallGroups} setSmallGroups={setSmallGroups}
+              praiseTeams={praiseTeams} setPraiseTeams={setPraiseTeams}
+              praiseBands={praiseBands} setPraiseBands={setPraiseBands}
+              departments={departments} setDepartments={setDepartments}
+              reservations={reservations} setReservations={setReservations}
+              onLogout={handleAdminLogout}
+            />
+          );
+        }
+        return <AdminLoginScreen setView={setView} onLoginSuccess={handleAdminLoginSuccess} />;
+      case ViewType.ADMIN_DASHBOARD:
+        if (!isAdmin) {
+          // 로그인되지 않은 상태라면 로그인 화면으로 리다이렉트
+          return <AdminLoginScreen setView={setView} onLoginSuccess={handleAdminLoginSuccess} />;
+        }
+        return (
+          <AdminDashboardScreen
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
             setView={setView}
             sermons={sermons} setSermons={setSermons}
             bulletins={bulletins} setBulletins={setBulletins}
@@ -94,6 +172,10 @@ const App: React.FC = () => {
             praiseBands={praiseBands} setPraiseBands={setPraiseBands}
             departments={departments} setDepartments={setDepartments}
             reservations={reservations} setReservations={setReservations}
+<<<<<<< HEAD
+=======
+            onLogout={handleAdminLogout}
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
           />
         );
       case ViewType.DETAIL:
@@ -108,7 +190,10 @@ const App: React.FC = () => {
     switch (view) {
       case ViewType.HOME: return "성남신광교회";
       case ViewType.BULLETIN: return "온라인 주보";
+<<<<<<< HEAD
       case ViewType.PROGRAM: return "양육 프로그램";
+=======
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       case ViewType.MEDIA: return "설교 미디어";
       case ViewType.MAP: return "오시는 길";
       case ViewType.MORE: return "더보기";
@@ -127,9 +212,15 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-navy-light dark:bg-navy-dark font-sans selection:bg-primary/30">
+<<<<<<< HEAD
       <Layout 
         currentView={view === ViewType.DETAIL ? ViewType.MEDIA : (view === ViewType.ADMIN_DASHBOARD || view === ViewType.ADMIN_LOGIN ? ViewType.MORE : view)} 
         setView={setView} 
+=======
+      <Layout
+        currentView={view === ViewType.DETAIL ? ViewType.MEDIA : (view === ViewType.ADMIN_DASHBOARD || view === ViewType.ADMIN_LOGIN ? ViewType.MORE : view)}
+        setView={setView}
+>>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
         title={getViewTitle()}
         showBack={view !== ViewType.HOME}
       >
