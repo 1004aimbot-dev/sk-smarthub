@@ -19,6 +19,7 @@ export const ProgramScreen: React.FC<ProgramScreenProps> = ({ batches, setBatche
   const [selectedProgram, setSelectedProgram] = useState<typeof PROGRAM_INFO[0] | null>(null);
   const [editModal, setEditModal] = useState<ProgramBatch | null>(null);
   const [newParticipant, setNewParticipant] = useState('');
+  const [newParticipantRole, setNewParticipantRole] = useState('');
 
   const filteredBatches = batches.filter(b => b.programId === selectedProgram?.title);
 
@@ -39,15 +40,20 @@ export const ProgramScreen: React.FC<ProgramScreenProps> = ({ batches, setBatche
 
   const addParticipant = () => {
     if (!newParticipant.trim() || !editModal) return;
-    if (editModal.participants.includes(newParticipant.trim())) {
+    const formattedName = newParticipantRole.trim()
+      ? `${newParticipant.trim()} (${newParticipantRole.trim()})`
+      : newParticipant.trim();
+
+    if (editModal.participants.includes(formattedName)) {
       alert('이미 등록된 이름입니다.');
       return;
     }
     setEditModal({
       ...editModal,
-      participants: [...editModal.participants, newParticipant.trim()]
+      participants: [...editModal.participants, formattedName]
     });
     setNewParticipant('');
+    setNewParticipantRole('');
   };
 
   const removeParticipant = (name: string) => {
@@ -75,7 +81,7 @@ export const ProgramScreen: React.FC<ProgramScreenProps> = ({ batches, setBatche
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-1">
             <h4 className="text-sm font-black text-navy-dark dark:text-white">진행 및 완료 기수</h4>
-            <button 
+            <button
               onClick={() => setEditModal({ id: '', programId: selectedProgram.title, term: '', instructor: '', manager: '', headcount: 0, startDate: '', endDate: '', participants: [] })}
               className="bg-primary text-navy-dark px-4 py-1.5 rounded-full text-[10px] font-black shadow-md active:scale-95 transition-transform"
             >
@@ -135,17 +141,17 @@ export const ProgramScreen: React.FC<ProgramScreenProps> = ({ batches, setBatche
                 <span className="material-symbols-outlined text-primary">{editModal.id ? 'edit_note' : 'add_task'}</span>
                 {editModal.id ? '기수 정보 수정' : '새 기수 등록'}
               </h4>
-              
+
               <div className="flex flex-col gap-4">
                 <InputWrapper label="기수 (예: 제 1기)" value={editModal.term} onChange={v => setEditModal({ ...editModal, term: v })} />
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <InputWrapper label="강사" value={editModal.instructor} onChange={v => setEditModal({ ...editModal, instructor: v })} />
                   <InputWrapper label="간사" value={editModal.manager} onChange={v => setEditModal({ ...editModal, manager: v })} />
                 </div>
-                
+
                 <InputWrapper label="수강 정원" type="number" value={String(editModal.headcount)} onChange={v => setEditModal({ ...editModal, headcount: Number(v) })} />
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <InputWrapper label="시작일" type="date" value={editModal.startDate.replace(/\./g, '-')} onChange={v => setEditModal({ ...editModal, startDate: v.replace(/-/g, '.') })} />
                   <InputWrapper label="종료일" type="date" value={editModal.endDate.replace(/\./g, '-')} onChange={v => setEditModal({ ...editModal, endDate: v.replace(/-/g, '.') })} />
@@ -157,17 +163,33 @@ export const ProgramScreen: React.FC<ProgramScreenProps> = ({ batches, setBatche
                 <div className="flex flex-col gap-3">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">수강생 명단 추가</label>
                   <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      placeholder="이름 입력" 
+                    <input
+                      type="text"
+                      placeholder="이름 입력"
                       value={newParticipant}
                       onChange={(e) => setNewParticipant(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && addParticipant()}
                       className="flex-1 bg-gray-50 dark:bg-navy-dark border-none rounded-xl p-3 text-xs font-bold dark:text-white focus:ring-1 focus:ring-primary shadow-inner"
                     />
+                    <select
+                      value={newParticipantRole}
+                      onChange={(e) => setNewParticipantRole(e.target.value)}
+                      className="w-28 bg-gray-50 dark:bg-navy-dark border-none rounded-xl p-3 text-xs font-bold dark:text-white focus:ring-1 focus:ring-primary shadow-inner"
+                    >
+                      <option value="">직분 (선택)</option>
+                      <option value="성도">성도</option>
+                      <option value="집사">집사</option>
+                      <option value="안수집사">안수집사</option>
+                      <option value="권사">권사</option>
+                      <option value="장로">장로</option>
+                      <option value="전도사">전도사</option>
+                      <option value="목사">목사</option>
+                      <option value="간사">간사</option>
+                      <option value="청년">청년</option>
+                    </select>
                     <button onClick={addParticipant} className="bg-navy-dark dark:bg-primary text-primary dark:text-navy-dark px-4 rounded-xl font-black text-xs active:scale-95 transition-transform">추가</button>
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-2 mt-2 bg-gray-50 dark:bg-navy-dark/40 p-3 rounded-2xl min-h-[60px] border border-dashed border-gray-200 dark:border-white/10">
                     {editModal.participants.length > 0 ? editModal.participants.map((name, idx) => (
                       <div key={idx} className="bg-white dark:bg-navy-accent px-3 py-1.5 rounded-full text-[11px] font-black text-navy-dark dark:text-white flex items-center gap-1.5 shadow-sm border border-gray-100 dark:border-white/5">
@@ -199,13 +221,13 @@ export const ProgramScreen: React.FC<ProgramScreenProps> = ({ batches, setBatche
           <span className="material-symbols-outlined text-8xl text-white">school</span>
         </div>
         <h3 className="text-primary font-black text-[10px] mb-2 tracking-[0.3em] uppercase relative z-10">Discipleship Roadmap</h3>
-        <p className="text-white font-black text-xl relative z-10 leading-tight">말씀으로 성장하고<br/>제자로 세워지는 공동체</p>
+        <p className="text-white font-black text-xl relative z-10 leading-tight">말씀으로 성장하고<br />제자로 세워지는 공동체</p>
       </div>
 
       <div className="flex flex-col gap-4">
         {PROGRAM_INFO.map((p, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             onClick={() => setSelectedProgram(p)}
             className="bg-white dark:bg-navy-accent p-6 rounded-[2.2rem] border border-gray-100 dark:border-white/5 flex gap-5 group cursor-pointer hover:border-primary/30 transition-all shadow-sm active:scale-[0.98] relative overflow-hidden"
           >
@@ -225,7 +247,7 @@ export const ProgramScreen: React.FC<ProgramScreenProps> = ({ batches, setBatche
       </div>
 
       <div className="text-center py-6">
-        <p className="text-[10px] text-gray-400 font-bold italic leading-relaxed">"성남신광교회 양육 시스템은 평신도를<br/>그리스도의 온전한 제자로 세우는 과정입니다."</p>
+        <p className="text-[10px] text-gray-400 font-bold italic leading-relaxed">"성남신광교회 양육 시스템은 평신도를<br />그리스도의 온전한 제자로 세우는 과정입니다."</p>
       </div>
     </div>
   );
@@ -246,11 +268,11 @@ const InfoItem: React.FC<{ icon: string; label: string; value: string; span?: bo
 const InputWrapper: React.FC<{ label: string; value: string; onChange: (v: string) => void; type?: string }> = ({ label, value, onChange, type = "text" }) => (
   <div className="flex flex-col gap-1.5">
     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{label}</label>
-    <input 
-      type={type} 
-      value={value} 
-      onChange={e => onChange(e.target.value)} 
-      className="w-full bg-gray-50 dark:bg-navy-dark border-none rounded-2xl p-4 text-xs font-bold dark:text-white focus:ring-2 focus:ring-primary shadow-inner" 
+    <input
+      type={type}
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="w-full bg-gray-50 dark:bg-navy-dark border-none rounded-2xl p-4 text-xs font-bold dark:text-white focus:ring-2 focus:ring-primary shadow-inner"
     />
   </div>
 );

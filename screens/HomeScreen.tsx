@@ -5,41 +5,23 @@ import { DEFAULT_PASTOR_PROFILE, DEFAULT_FLOOR_DATA } from '../constants';
 
 interface HomeScreenProps {
   setView: (view: ViewType) => void;
+  pastorProfile: PastorProfile;
+  floorData: FloorData[];
 }
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({ setView, pastorProfile, floorData }) => {
   const [selectedFloor, setSelectedFloor] = useState<FloorData | null>(null);
   const [isPastorModalOpen, setIsPastorModalOpen] = useState(false);
-  const [pastorProfile, setPastorProfile] = useState<PastorProfile>(DEFAULT_PASTOR_PROFILE);
-  const [floorData, setFloorData] = useState<FloorData[]>(DEFAULT_FLOOR_DATA);
+  // floorData state removed, receiving via props now
 
-  useEffect(() => {
-    const loadData = () => {
-      // 목회자 프로필 로드
-      const savedPastor = localStorage.getItem('shinkwang_pastor_profile');
-      if (savedPastor) setPastorProfile(JSON.parse(savedPastor));
-      
-      // 시설 정보 로드
-      const savedFloors = localStorage.getItem('shinkwang_floor_data');
-      if (savedFloors) {
-        setFloorData(JSON.parse(savedFloors));
-      } else {
-        localStorage.setItem('shinkwang_floor_data', JSON.stringify(DEFAULT_FLOOR_DATA));
-        setFloorData(DEFAULT_FLOOR_DATA);
-      }
-    };
-    
-    loadData();
-    window.addEventListener('storage', loadData);
-    return () => window.removeEventListener('storage', loadData);
-  }, []);
+  // useEffect for loadData removed as data is now managed in App.tsx
 
   const handleLiveStream = () => alert('유튜브 실시간 예배 스트리밍 채널로 연결합니다.');
 
   return (
     <div className="flex flex-col gap-6 p-4 bg-[#F8FAFC] dark:bg-navy-dark min-h-full">
       {/* 히어로 섹션 */}
-      <div 
+      <div
         className="relative h-64 rounded-3xl overflow-hidden bg-cover bg-center flex flex-col justify-end p-6 shadow-xl"
         style={{ backgroundImage: 'linear-gradient(to top, rgba(14,22,36,0.9), transparent), url(https://lh3.googleusercontent.com/aida-public/AB6AXuAtCrPYVF_ain851PfDjTj8WOZJkdhU6tXx2DPKTsntmeJ3jbkI4QO_qxp_B7bYLcMK8fGhr4T4Vzauhzw78VWBxZeNlQAcYVE_KmDCzaiv67Iqg0ZF7xgIdYMBJIi_MhJvZ0nh-LZXhafvNaEPd6z9-GpuLP0jsa3QeOmdGpzD5wKXAlHuw2PErCGvuu9Aaub7QFHeBqn2U5CeL_j8o5H3ukiGHMuThnfKu77VQLKshC5bT-JWyYelh-9gMp8XxXip0vgJ8r4oIJg)' }}
       >
@@ -47,9 +29,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
           LIVE
         </div>
         <div className="z-10 flex flex-col gap-2">
-          <h2 className="text-white text-2xl font-black leading-tight tracking-tight">하나님을 기쁘시게<br/>사람을 행복하게</h2>
+          <h2 className="text-white text-2xl font-black leading-tight tracking-tight">하나님을 기쁘시게<br />사람을 행복하게</h2>
           <p className="text-gray-300 text-sm font-medium">성남신광교회 온라인 성전에 오신 여러분을 환영합니다.</p>
-          <button 
+          <button
             onClick={handleLiveStream}
             className="mt-3 w-full bg-primary text-navy-dark font-black py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-yellow-500 transition-all shadow-lg active:scale-95"
           >
@@ -60,7 +42,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
       </div>
 
       {/* 담임목사 인사말 섹션 */}
-      <div 
+      <div
         onClick={() => setIsPastorModalOpen(true)}
         className="bg-white dark:bg-navy-accent rounded-[2.5rem] p-6 shadow-sm border border-gray-100 dark:border-white/5 flex gap-5 items-center cursor-pointer hover:shadow-md transition-all active:scale-[0.98] group"
       >
@@ -86,20 +68,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
         <h3 className="text-navy-dark dark:text-white font-black text-lg px-1">비전센터 시설 안내</h3>
         <div className="flex flex-col gap-3">
           {floorData.map((data, idx) => (
-            <FloorItem 
+            <FloorItem
               key={idx}
-              floor={data.floor} 
-              title={data.title} 
-              desc={data.summary} 
-              icon={data.icon} 
-              onClick={() => setSelectedFloor(data)} 
+              floor={data.floor}
+              title={data.title}
+              desc={data.summary}
+              icon={data.icon}
+              onClick={() => setSelectedFloor(data)}
             />
           ))}
         </div>
       </div>
 
       {/* AI 성경 길잡이 봇 */}
-      <div 
+      <div
         onClick={() => setView(ViewType.AI_CHAT)}
         className="relative overflow-hidden bg-gradient-to-br from-navy-dark to-navy-accent dark:from-navy-accent dark:to-navy-dark rounded-3xl p-6 shadow-lg border border-primary/20 cursor-pointer group transition-all active:scale-[0.98]"
       >
@@ -122,7 +104,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
       </div>
 
       {/* 공간 예약 카드 */}
-      <div 
+      <div
         onClick={() => setView(ViewType.RESERVATION)}
         className="bg-white dark:bg-navy-accent rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-white/5 flex flex-col gap-5 cursor-pointer hover:shadow-md hover:border-primary/20 transition-all active:scale-[0.98] group"
       >
@@ -135,7 +117,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
             <span className="material-symbols-outlined text-2xl filled">calendar_month</span>
           </div>
         </div>
-        <button 
+        <button
           className="w-full bg-navy-dark dark:bg-primary py-4 rounded-2xl text-white dark:text-navy-dark font-black text-sm shadow-xl active:scale-[0.97] transition-all hover:brightness-110"
         >
           예약 신청하기
@@ -150,8 +132,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
             <div className="relative h-64 w-full">
               <img src={pastorProfile.image} className="w-full h-full object-cover object-top" alt="" />
               <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-navy-accent via-transparent to-transparent"></div>
-              <button 
-                onClick={() => setIsPastorModalOpen(false)} 
+              <button
+                onClick={() => setIsPastorModalOpen(false)}
                 className="absolute top-4 right-4 size-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white"
               >
                 <span className="material-symbols-outlined">close</span>
@@ -196,11 +178,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
                 </button>
               </div>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto no-scrollbar p-6 pt-4">
               <div className="flex flex-col gap-4">
                 {selectedFloor.rooms.map((room, idx) => (
-                  <div 
+                  <div
                     key={idx}
                     className="bg-gray-50 dark:bg-navy-dark/40 rounded-3xl p-5 border border-transparent hover:border-primary/20 transition-all flex flex-col gap-3 group"
                   >
@@ -227,9 +209,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
             </div>
 
             <div className="p-6 bg-gray-50 dark:bg-navy-dark/60 border-t border-gray-100 dark:border-white/5 shrink-0">
-              <button 
-                onClick={() => { 
-                  setSelectedFloor(null); 
+              <button
+                onClick={() => {
+                  setSelectedFloor(null);
                   setView(ViewType.RESERVATION);
                 }}
                 className="w-full bg-primary text-navy-dark font-black py-4 rounded-[1.5rem] shadow-lg active:scale-95 transition-all text-sm"
@@ -245,7 +227,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ setView }) => {
 };
 
 const FloorItem: React.FC<{ floor: string; title: string; desc: string; icon: string; onClick: () => void }> = ({ floor, title, desc, icon, onClick }) => (
-  <div 
+  <div
     onClick={onClick}
     className="flex items-center gap-4 bg-white dark:bg-navy-accent p-4 rounded-2xl shadow-sm hover:shadow-md border border-gray-50 dark:border-white/5 transition-all cursor-pointer active:scale-[0.98]"
   >

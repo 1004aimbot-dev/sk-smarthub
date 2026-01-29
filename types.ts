@@ -13,7 +13,6 @@ export enum ViewType {
   SMALL_GROUP = 'SMALL_GROUP',
   ALBUM = 'ALBUM',
   ADMIN_LOGIN = 'ADMIN_LOGIN',
-<<<<<<< HEAD
   ADMIN_DASHBOARD = 'ADMIN_DASHBOARD',
   PROGRAM = 'PROGRAM'
 }
@@ -28,9 +27,6 @@ export interface ProgramBatch {
   startDate: string;  // 시작일
   endDate: string;    // 종료일
   participants: string[]; // 수강생 명단 추가
-=======
-  ADMIN_DASHBOARD = 'ADMIN_DASHBOARD'
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
 }
 
 export interface BulletinRecord {
@@ -94,6 +90,7 @@ export interface Department {
 }
 
 export interface PastorProfile {
+  id?: number;
   name: string;
   quote: string;
   content: string;
@@ -109,6 +106,7 @@ export interface RoomDetail {
 }
 
 export interface FloorData {
+  id?: number;
   floor: string;
   title: string;
   summary: string;
@@ -133,20 +131,22 @@ export interface Sermon {
   thumbnail: string;
   description?: string;
   videoUrl?: string;
+  startTime?: string;
+  endTime?: string;
   attachments?: ArchiveItem[];
 }
 
 export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
-  images?: string[]; 
+  images?: string[];
 }
 
 export interface ReservationData {
   id: string;
   roomId: string;
   roomName: string;
-  applicantName: string; 
+  applicantName: string;
   date: string;
   startTime: string;
   endTime: string;
@@ -166,7 +166,7 @@ export interface Notice {
 
 export interface SmallGroup {
   id: string;
-  category: string; 
+  category: string;
   name: string;
   leader: string;
   time: string;

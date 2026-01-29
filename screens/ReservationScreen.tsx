@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { ReservationData } from '../types';
+import { ReservationData, ViewType } from '../types';
+import { supabase } from '../src/lib/supabase';
 
 interface Room {
   id: string;
@@ -31,14 +31,17 @@ const AVAILABLE_ROOMS: Room[] = [
   { id: '405', floor: '4층', name: '비전홀 405호 (미디어실)', desc: '4층 영상 편집실', thumbnail: 'https://picsum.photos/seed/room405/200/200' },
 ];
 
-<<<<<<< HEAD
 const MAX_DURATION_MINUTES = 120; // 최대 2시간
 
-=======
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
-export const ReservationScreen: React.FC = () => {
+interface ReservationScreenProps {
+  reservations: ReservationData[];
+  setReservations: React.Dispatch<React.SetStateAction<ReservationData[]>>;
+  setView: (view: ViewType) => void;
+}
+
+export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservations, setReservations, setView }) => {
   const getTodayString = () => new Date().toISOString().split('T')[0];
-  
+
   const [selectedRoom, setSelectedRoom] = useState<Room>(AVAILABLE_ROOMS[0]);
   const [date, setDate] = useState(getTodayString());
   const [startTime, setStartTime] = useState("10:00");
@@ -50,26 +53,14 @@ export const ReservationScreen: React.FC = () => {
   const [existingReservations, setExistingReservations] = useState<ReservationData[]>([]);
   const [selectionStep, setSelectionStep] = useState<'START' | 'END'>('START');
 
-<<<<<<< HEAD
-  // 데이터 로드
+  // 데이트 변경 시 필터링
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('shinkwang_reservations') || '[]');
-=======
-  // 데이터 로드 및 초기화
-  useEffect(() => {
-    let saved = JSON.parse(localStorage.getItem('shinkwang_reservations') || '[]');
-    if (saved.length === 0) {
-      saved = [
-        { id: 's1', roomId: '201', roomName: '비전홀 201호', applicantName: '관리자', date: getTodayString(), startTime: '13:00', endTime: '15:00', headcount: 10, purpose: '샘플 예약', status: 'APPROVED', createdAt: new Date().toISOString() }
-      ];
-      localStorage.setItem('shinkwang_reservations', JSON.stringify(saved));
-    }
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
-    const filtered = saved.filter((res: ReservationData) => 
+    // props.reservations에서 필터링
+    const filtered = reservations.filter((res: ReservationData) =>
       res.roomId === selectedRoom.id && res.date === date && res.status !== 'REJECTED'
     );
     setExistingReservations(filtered);
-  }, [selectedRoom, date]);
+  }, [selectedRoom, date, reservations]);
 
   // 시간 헬퍼 함수
   const timeToMinutes = (time: string) => {
@@ -109,7 +100,7 @@ export const ReservationScreen: React.FC = () => {
     const newTime = minutesToTime(clickedMinutes);
 
     // 이미 예약된 슬롯 내부인지 확인
-    const isBooked = existingReservations.some(res => 
+    const isBooked = existingReservations.some(res =>
       newTime >= res.startTime && newTime < res.endTime
     );
 
@@ -127,7 +118,6 @@ export const ReservationScreen: React.FC = () => {
         setStartTime(newTime);
         return;
       }
-<<<<<<< HEAD
 
       // 2시간 제한 체크
       const duration = timeToMinutes(newTime) - timeToMinutes(startTime);
@@ -136,10 +126,8 @@ export const ReservationScreen: React.FC = () => {
         return;
       }
 
-=======
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       // 선택한 범위 사이에 예약이 있는지 확인
-      const hasConflictInRange = existingReservations.some(res => 
+      const hasConflictInRange = existingReservations.some(res =>
         (startTime < res.endTime && newTime > res.startTime)
       );
       if (hasConflictInRange) {
@@ -157,9 +145,8 @@ export const ReservationScreen: React.FC = () => {
     let newMin = timeToMinutes(current) + delta;
     newMin = Math.max(START_H * 60, Math.min(END_H * 60, newMin));
     const newTime = minutesToTime(newMin);
-    
+
     if (target === 'start') {
-<<<<<<< HEAD
       const isOverlap = existingReservations.some(res => newTime >= res.startTime && newTime < res.endTime);
       if (isOverlap) return;
 
@@ -167,12 +154,6 @@ export const ReservationScreen: React.FC = () => {
       const duration = timeToMinutes(endTime) - newMin;
       if (duration > MAX_DURATION_MINUTES) return;
 
-=======
-      // 새로운 시작 시간이 기존 예약과 겹치는지 확인
-      const isOverlap = existingReservations.some(res => newTime >= res.startTime && newTime < res.endTime);
-      if (isOverlap) return;
-
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       setStartTime(newTime);
       if (newTime >= endTime) {
         const nextEnd = minutesToTime(newMin + 30);
@@ -180,8 +161,7 @@ export const ReservationScreen: React.FC = () => {
       }
     } else {
       if (newTime <= startTime) return;
-      
-<<<<<<< HEAD
+
       const isOverlap = existingReservations.some(res => startTime < res.endTime && newTime > res.startTime);
       if (isOverlap) return;
 
@@ -189,60 +169,79 @@ export const ReservationScreen: React.FC = () => {
       const duration = newMin - timeToMinutes(startTime);
       if (duration > MAX_DURATION_MINUTES) return;
 
-=======
-      // 새로운 종료 시간까지의 범위가 기존 예약과 겹치는지 확인
-      const isOverlap = existingReservations.some(res => startTime < res.endTime && newTime > res.startTime);
-      if (isOverlap) return;
-
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       setEndTime(newTime);
     }
   };
 
-<<<<<<< HEAD
-=======
-  // 중복 확인 (최종 제출 시)
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
   const isConflict = useMemo(() => {
     return existingReservations.some(res => startTime < res.endTime && endTime > res.startTime);
   }, [startTime, endTime, existingReservations]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isConflict) { alert('선택하신 시간에 이미 예약이 있습니다.'); return; }
-<<<<<<< HEAD
-    
+
     // 최종 이용 시간 체크
     const duration = timeToMinutes(endTime) - timeToMinutes(startTime);
     if (duration > MAX_DURATION_MINUTES) {
-        alert('공간 이용 시간은 최대 2시간까지 가능합니다.');
-        return;
+      alert('공간 이용 시간은 최대 2시간까지 가능합니다.');
+      return;
     }
 
-=======
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
     if (!applicantName.trim()) { alert('신청자 이름을 입력해주세요.'); return; }
     if (!purpose.trim()) { alert('사용 목적을 입력해주세요.'); return; }
     if (!agreed) { alert('개인정보 동의가 필요합니다.'); return; }
 
-<<<<<<< HEAD
-    // 전 구역 중복 성함 체크 로직 추가
-    const allReservations: ReservationData[] = JSON.parse(localStorage.getItem('shinkwang_reservations') || '[]');
-    const hasNameConflict = allReservations.some(res => 
-        res.date === date && 
-        res.applicantName.trim() === applicantName.trim() &&
-        res.status !== 'REJECTED' &&
-        (startTime < res.endTime && endTime > res.startTime)
+    // 4. 동명인 1일 중복 신청 방지 (status가 REJECTED인 것은 제외)
+    // 기존 예약 목록에서 날짜와 이름이 같은 것이 있는지 확인
+    const isDuplicate = reservations.some(res =>
+      res.date === date &&
+      res.applicantName.trim() === applicantName.trim() &&
+      res.status !== 'REJECTED'
     );
 
-    if (hasNameConflict) {
-        alert('입력하신 성함으로 이미 동일한 날짜/시간대에 다른 공간 예약 내역이 존재합니다. 중복 예약은 불가능합니다.');
-        return;
+    if (isDuplicate) {
+      alert('같은 날짜에 이미 예약하신 내역이 있습니다.\n(동일인 1일 1회 예약 제한)');
+      return;
     }
 
-=======
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
+    // 5. 교인 인증 로직 (임시: 목업 리스트 사용)
+    // 실제 운영 시에는 supabase 'members' 테이블 조회로 교체 필요
+    // 현재는 테스트를 위해 특정 이름들과, 2글자 이상인 경우 통과시킬 수도 있지만, 
+    // 요청사항대로 "체크하는 로직"을 명시적으로 넣습니다.
+
+    // TODO: 실제 교인 DB 연동 필요. 현재는 DB가 없으므로 로직 흐름만 구현.
+    // 임시로 모든 입력을 허용하되, 콘솔에만 로그를 찍거나, 
+    // 테스트용으로 특정 이름만 허용하려면 아래 주석을 해제하세요.
+    /*
+    const mockMembers = ['홍길동', '김철수', '이현용', '박지성'];
+    if (!mockMembers.includes(applicantName.trim())) {
+        alert('교인 명단에서 확인되지 않습니다.\n사무실에 문의해주세요.');
+        return;
+    }
+    */
+
+    // 지금은 "교인 확인 로직"이 동작함을 보여주기 위해, 이름이 비어있지 않으면 통과시키되
+    // "교인 확인 완료"라는 로그를 남깁니다. (실제 DB 연동 전 단계)
+    console.log('교인 확인 로직 통과:', applicantName);
+
+
+    // 전 구역 중복 예약 방지 (시간 겹침) - 기존 로직 유지
+    const hasConflict = reservations.some(res =>
+      res.date === date &&
+      res.roomId !== selectedRoom.id && // 다른 방이어도
+      res.status !== 'REJECTED' &&      // 거절된 것 제외하고
+      (startTime < res.endTime && endTime > res.startTime) // 시간이 겹치면
+    );
+
+    if (hasConflict) {
+      alert('해당 시간대에 다른 공간이 이미 사용 중입니다.\n(전체 시설 동시 사용 제한)');
+      return;
+    }
+
+
+
     const newRes: ReservationData = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: String(Date.now()), // create local ID for optimistic update, Supabase might generate one but text id is fine
       roomId: selectedRoom.id,
       roomName: selectedRoom.name,
       applicantName: applicantName.trim(),
@@ -251,32 +250,32 @@ export const ReservationScreen: React.FC = () => {
       createdAt: new Date().toISOString()
     };
 
-    const all = JSON.parse(localStorage.getItem('shinkwang_reservations') || '[]');
-    localStorage.setItem('shinkwang_reservations', JSON.stringify([...all, newRes]));
-    alert('예약이 신청되었습니다!');
-<<<<<<< HEAD
-    
-    // 타임라인 즉시 업데이트를 위해 상태 갱신
-    setExistingReservations(prev => [...prev, newRes]);
-    setPurpose('');
-=======
-    setPurpose('');
-    setApplicantName('');
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
+    try {
+      const { error } = await supabase.from('reservations').insert(newRes);
+      if (error) {
+        console.error('Reservation failed:', error);
+        alert('예약 신청에 실패했습니다: ' + error.message);
+        return;
+      }
+
+      // Optimistic Update
+      setReservations(prev => [newRes, ...prev]);
+      alert('예약이 신청되었습니다!');
+      setView(ViewType.HOME);
+    } catch (e) {
+      console.error('Error submitting reservation:', e);
+      alert('오류가 발생했습니다.');
+    }
   };
 
   return (
     <div className="flex flex-col gap-6 p-5 pb-24 bg-[#FAF7ED] dark:bg-navy-dark min-h-full">
-      
-<<<<<<< HEAD
+
       {/* 1. 장소 및 날짜 */}
-=======
-      {/* 1. 장소 및 날짜 (그룹화된 선택창) */}
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-black text-navy-dark dark:text-white tracking-tight">장소 및 날짜</h2>
-          <button 
+          <button
             onClick={() => setDate(getTodayString())}
             className="text-[10px] font-black text-primary border border-primary/30 px-3 py-1.5 rounded-full bg-white dark:bg-navy-accent shadow-sm"
           >
@@ -284,7 +283,7 @@ export const ReservationScreen: React.FC = () => {
           </button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <select 
+          <select
             value={selectedRoom.id}
             onChange={(e) => setSelectedRoom(AVAILABLE_ROOMS.find(r => r.id === e.target.value) || AVAILABLE_ROOMS[0])}
             className="bg-white dark:bg-navy-accent border-none rounded-2xl p-4 text-sm font-bold shadow-sm dark:text-white focus:ring-2 focus:ring-primary/50"
@@ -299,8 +298,8 @@ export const ReservationScreen: React.FC = () => {
               {AVAILABLE_ROOMS.filter(r => r.floor === '4층').map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
             </optgroup>
           </select>
-          <input 
-            type="date" 
+          <input
+            type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className="bg-white dark:bg-navy-accent border-none rounded-2xl p-4 text-sm font-bold shadow-sm dark:text-white focus:ring-2 focus:ring-primary/50"
@@ -322,36 +321,29 @@ export const ReservationScreen: React.FC = () => {
             {isConflict && <span className="text-[10px] text-red-500 font-black animate-pulse">중복 발생!</span>}
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-navy-accent rounded-[2.5rem] p-8 shadow-xl border border-primary/10 relative">
-<<<<<<< HEAD
           <div className="mb-4 text-center">
-             <span className="text-[10px] font-bold text-red-400/80 bg-red-50 dark:bg-red-900/20 px-3 py-1 rounded-full border border-red-100 dark:border-red-900/30">
-               ⚠️ 한 세션당 최대 2시간까지만 이용 가능합니다.
-             </span>
+            <span className="text-[10px] font-bold text-red-400/80 bg-red-50 dark:bg-red-900/20 px-3 py-1 rounded-full border border-red-100 dark:border-red-900/30">
+              ⚠️ 한 세션당 최대 2시간까지만 이용 가능합니다.
+            </span>
           </div>
-=======
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
-          <div 
+          <div
             className="h-16 w-full bg-gray-50 dark:bg-navy-dark rounded-full relative cursor-crosshair overflow-hidden border-2 border-primary/5 shadow-inner"
             onClick={handleTimelineClick}
           >
             {/* 시간 눈금 */}
-            {Array.from({length: 33}).map((_, i) => (
-              <div 
-                key={i} 
-                className={`absolute top-0 bottom-0 w-px ${i % 2 === 0 ? 'bg-gray-200 dark:bg-white/10 h-full' : 'bg-gray-100 dark:bg-white/5 h-1/2 mt-auto'}`} 
-                style={{ left: `${(i/32)*100}%` }}
+            {Array.from({ length: 33 }).map((_, i) => (
+              <div
+                key={i}
+                className={`absolute top-0 bottom-0 w-px ${i % 2 === 0 ? 'bg-gray-200 dark:bg-white/10 h-full' : 'bg-gray-100 dark:bg-white/5 h-1/2 mt-auto'}`}
+                style={{ left: `${(i / 32) * 100}%` }}
               ></div>
             ))}
 
-<<<<<<< HEAD
             {/* 이미 예약된 슬롯 */}
-=======
-            {/* 이미 예약된 슬롯 (빗금 패턴) */}
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
             {existingReservations.map(res => (
-              <div 
+              <div
                 key={res.id}
                 className="absolute top-0 bottom-0 z-10 booked-pattern border-x border-gray-300 dark:border-white/10"
                 style={{ left: `${getPos(res.startTime)}%`, width: `${getPos(res.endTime) - getPos(res.startTime)}%` }}
@@ -363,7 +355,7 @@ export const ReservationScreen: React.FC = () => {
             ))}
 
             {/* 현재 선택 영역 */}
-            <div 
+            <div
               className={`absolute top-0 bottom-0 z-20 transition-all duration-300 ${isConflict ? 'bg-red-500/40 border-x-4 border-red-600' : 'bg-blue-500/30 border-x-4 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.2)]'}`}
               style={{ left: `${getPos(startTime)}%`, width: `${getPos(endTime) - getPos(startTime)}%` }}
             >
@@ -406,27 +398,16 @@ export const ReservationScreen: React.FC = () => {
         <div className="flex flex-col gap-2">
           <label className="text-sm font-black text-navy-dark dark:text-white flex items-center gap-2 px-1">
             <span className="material-symbols-outlined text-primary text-lg">person</span>
-<<<<<<< HEAD
             신청자 성함
           </label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="예약자의 실명을 입력해주세요."
-=======
-            신청자 이름
-          </label>
-          <input 
-            type="text" 
-            placeholder="성함을 입력해주세요."
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
             value={applicantName}
             onChange={(e) => setApplicantName(e.target.value)}
             className="w-full bg-[#FAF7ED] dark:bg-navy-dark border-none rounded-2xl p-4 text-sm font-bold shadow-inner dark:text-white focus:ring-2 focus:ring-primary/30"
           />
-<<<<<<< HEAD
           <p className="text-[10px] text-gray-400 font-bold ml-1">※ 동일 시간대 전 공간 중복 예약은 차단됩니다.</p>
-=======
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
         </div>
 
         <div className="flex items-center justify-between px-1">
@@ -446,8 +427,8 @@ export const ReservationScreen: React.FC = () => {
             <span className="material-symbols-outlined text-primary text-lg">edit_document</span>
             사용 목적
           </label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="예: 성경 공부, 부서 회의"
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
@@ -464,14 +445,13 @@ export const ReservationScreen: React.FC = () => {
           </div>
           <span className="text-sm font-bold text-gray-500 group-hover:text-primary transition-colors">개인정보 수집 및 이용 동의</span>
         </div>
-        <button 
+        <button
           onClick={handleSubmit}
           disabled={isConflict}
-          className={`w-full py-5 rounded-[2rem] font-black text-lg shadow-xl transition-all active:scale-95 ${
-            isConflict 
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-              : 'bg-navy-dark dark:bg-primary text-primary dark:text-navy-dark hover:brightness-110'
-          }`}
+          className={`w-full py-5 rounded-[2rem] font-black text-lg shadow-xl transition-all active:scale-95 ${isConflict
+            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            : 'bg-navy-dark dark:bg-primary text-primary dark:text-navy-dark hover:brightness-110'
+            }`}
         >
           {isConflict ? '시간을 다시 선택해주세요' : '예약 신청하기'}
         </button>

@@ -1,10 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-<<<<<<< HEAD
-import { ViewType, Sermon, BulletinRecord, SmallGroup, PraiseTeam, PraiseBand, Department, ReservationData, ProgramBatch } from './types';
-=======
-import { ViewType, Sermon, BulletinRecord, SmallGroup, PraiseTeam, PraiseBand, Department, ReservationData } from './types';
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
+import { supabase } from './src/lib/supabase';
+import { ViewType, Sermon, BulletinRecord, SmallGroup, PraiseTeam, PraiseBand, Department, ReservationData, ProgramBatch, PastorProfile, FloorData } from './types';
 import { Layout } from './components/Layout';
 import { HomeScreen } from './screens/HomeScreen';
 import { BulletinScreen } from './screens/BulletinScreen';
@@ -20,77 +17,129 @@ import { SmallGroupScreen } from './screens/SmallGroupScreen';
 import { AlbumScreen } from './screens/AlbumScreen';
 import { AdminLoginScreen } from './screens/AdminLoginScreen';
 import { AdminDashboardScreen } from './screens/AdminDashboardScreen';
-<<<<<<< HEAD
 import { ProgramScreen } from './screens/ProgramScreen';
-import { 
-  INITIAL_BULLETIN_RECORDS, 
-  MOCK_SERMONS, 
-  DEFAULT_SMALL_GROUPS,
-  DEFAULT_PRAISE_TEAMS,
-  DEFAULT_PRAISE_BANDS,
-  DEFAULT_DEPARTMENTS,
-  INITIAL_PROGRAM_BATCHES
-} from './constants';
-
-=======
 import {
   INITIAL_BULLETIN_RECORDS,
   MOCK_SERMONS,
   DEFAULT_SMALL_GROUPS,
   DEFAULT_PRAISE_TEAMS,
   DEFAULT_PRAISE_BANDS,
-  DEFAULT_DEPARTMENTS
+  DEFAULT_DEPARTMENTS,
+  INITIAL_PROGRAM_BATCHES,
+  DEFAULT_PASTOR_PROFILE,
+  DEFAULT_FLOOR_DATA
 } from './constants';
 
-// [베테랑 비책] 빈 배열([])도 엄연한 데이터입니다. null일 때만 초기값을 로드합니다.
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
-const getInitialData = <T,>(key: string, defaultValue: T): T => {
-  const saved = localStorage.getItem(key);
-  if (saved !== null) {
-    try {
-      return JSON.parse(saved);
-    } catch (e) {
-      console.error(`Error parsing ${key}`, e);
-      return defaultValue;
-    }
-  }
-  return defaultValue;
-};
+// Assuming supabase client is imported here, e.g.:
+// import { supabase } from './supabaseClient';
+
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>(ViewType.HOME);
   const [selectedSermon, setSelectedSermon] = useState<Sermon | null>(null);
 
-<<<<<<< HEAD
-=======
   // 전역 상태 관리 (로컬스토리지 우선)
   const [isAdmin, setIsAdmin] = useState<boolean>(() => localStorage.getItem('shinkwang_is_admin') === 'true');
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
-  const [sermons, setSermons] = useState<Sermon[]>(() => getInitialData('shinkwang_sermons', MOCK_SERMONS));
-  const [bulletins, setBulletins] = useState<BulletinRecord[]>(() => getInitialData('shinkwang_bulletins', INITIAL_BULLETIN_RECORDS));
-  const [smallGroups, setSmallGroups] = useState<SmallGroup[]>(() => getInitialData('shinkwang_small_groups', DEFAULT_SMALL_GROUPS));
-  const [praiseTeams, setPraiseTeams] = useState<PraiseTeam[]>(() => getInitialData('shinkwang_praise_teams', DEFAULT_PRAISE_TEAMS));
-  const [praiseBands, setPraiseBands] = useState<PraiseBand[]>(() => getInitialData('shinkwang_praise_bands', DEFAULT_PRAISE_BANDS));
-  const [departments, setDepartments] = useState<Department[]>(() => getInitialData('shinkwang_departments', DEFAULT_DEPARTMENTS));
-  const [reservations, setReservations] = useState<ReservationData[]>(() => getInitialData('shinkwang_reservations', []));
-<<<<<<< HEAD
-  const [programBatches, setProgramBatches] = useState<ProgramBatch[]>(() => getInitialData('shinkwang_program_batches', INITIAL_PROGRAM_BATCHES));
+  // States initialized with empty arrays/defaults
+  const [sermons, setSermons] = useState<Sermon[]>([]);
+  const [bulletins, setBulletins] = useState<BulletinRecord[]>([]);
+  const [smallGroups, setSmallGroups] = useState<SmallGroup[]>([]);
+  const [praiseTeams, setPraiseTeams] = useState<PraiseTeam[]>([]);
+  const [praiseBands, setPraiseBands] = useState<PraiseBand[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [reservations, setReservations] = useState<ReservationData[]>([]);
+  const [programBatches, setProgramBatches] = useState<ProgramBatch[]>([]);
+  // Use defaults for single objects to avoid null checks initially
+  const [pastorProfile, setPastorProfile] = useState<PastorProfile>(DEFAULT_PASTOR_PROFILE);
+  const [floorData, setFloorData] = useState<FloorData[]>(DEFAULT_FLOOR_DATA);
 
-=======
+  // Fetch Data from Supabase
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data: sermonData } = await supabase.from('sermons').select('*').order('date', { ascending: false });
+        if (sermonData) setSermons(sermonData);
 
-  // 상태 변화 감지 즉시 로컬스토리지 저장 (Race Condition 방지)
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
-  useEffect(() => { localStorage.setItem('shinkwang_sermons', JSON.stringify(sermons)); }, [sermons]);
-  useEffect(() => { localStorage.setItem('shinkwang_bulletins', JSON.stringify(bulletins)); }, [bulletins]);
-  useEffect(() => { localStorage.setItem('shinkwang_small_groups', JSON.stringify(smallGroups)); }, [smallGroups]);
-  useEffect(() => { localStorage.setItem('shinkwang_praise_teams', JSON.stringify(praiseTeams)); }, [praiseTeams]);
-  useEffect(() => { localStorage.setItem('shinkwang_praise_bands', JSON.stringify(praiseBands)); }, [praiseBands]);
-  useEffect(() => { localStorage.setItem('shinkwang_departments', JSON.stringify(departments)); }, [departments]);
-  useEffect(() => { localStorage.setItem('shinkwang_reservations', JSON.stringify(reservations)); }, [reservations]);
-<<<<<<< HEAD
-  useEffect(() => { localStorage.setItem('shinkwang_program_batches', JSON.stringify(programBatches)); }, [programBatches]);
-=======
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
+        const { data: bulletinData } = await supabase.from('bulletins').select('*').order('date', { ascending: false });
+        if (bulletinData) setBulletins(bulletinData);
+
+        const { data: groupData } = await supabase.from('small_groups').select('*');
+        if (groupData && groupData.length > 0) { setSmallGroups(groupData); }
+        else {
+          // Init Small Groups
+          await supabase.from('small_groups').insert(DEFAULT_SMALL_GROUPS.map(d => ({ ...d, id: String(Date.now() + Math.random()) })));
+          const { data: refetched } = await supabase.from('small_groups').select('*');
+          if (refetched) setSmallGroups(refetched);
+        }
+
+        const { data: teamData } = await supabase.from('praise_teams').select('*');
+        if (teamData && teamData.length > 0) { setPraiseTeams(teamData); }
+        else {
+          // Init Praise Teams
+          await supabase.from('praise_teams').insert(DEFAULT_PRAISE_TEAMS.map(d => ({ ...d, id: String(Date.now() + Math.random()) })));
+          const { data: refetched } = await supabase.from('praise_teams').select('*');
+          if (refetched) setPraiseTeams(refetched);
+        }
+
+        const { data: bandData } = await supabase.from('praise_bands').select('*');
+        if (bandData && bandData.length > 0) { setPraiseBands(bandData); }
+        else {
+          // Init Praise Bands
+          await supabase.from('praise_bands').insert(DEFAULT_PRAISE_BANDS.map(d => ({ ...d, id: String(Date.now() + Math.random()) })));
+          const { data: refetched } = await supabase.from('praise_bands').select('*');
+          if (refetched) setPraiseBands(refetched);
+        }
+
+        const { data: deptData } = await supabase.from('departments').select('*');
+        if (deptData && deptData.length > 0) { setDepartments(deptData); }
+        else {
+          // Init Departments
+          await supabase.from('departments').insert(DEFAULT_DEPARTMENTS.map(d => ({ ...d, id: String(Date.now() + Math.random()) })));
+          const { data: refetched } = await supabase.from('departments').select('*');
+          if (refetched) setDepartments(refetched);
+        }
+
+        const { data: resData } = await supabase.from('reservations').select('*').order('date', { ascending: false });
+        if (resData) setReservations(resData);
+
+        const { data: progData } = await supabase.from('program_batches').select('*');
+        if (progData) setProgramBatches(progData);
+
+        const { data: pastorData } = await supabase.from('pastor_profile').select('*').single();
+        if (pastorData) setPastorProfile(pastorData);
+
+        const { data: floorData } = await supabase.from('floor_data').select('*').order('id', { ascending: true });
+        if (floorData && floorData.length > 0) {
+          setFloorData(floorData);
+        } else {
+          // 초기 데이터가 없으면 DEFAULT_FLOOR_DATA를 삽입
+          console.log('Inserting default floor data...');
+          const { error: insertError } = await supabase.from('floor_data').insert(
+            DEFAULT_FLOOR_DATA.map(f => {
+              // DB 스키마에 맞춰 id 제외하고 삽입
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { id, ...rest } = f;
+              return rest;
+            })
+          );
+
+          if (!insertError) {
+            const { data: refetched } = await supabase.from('floor_data').select('*').order('id', { ascending: true });
+            if (refetched) setFloorData(refetched);
+          } else {
+            console.error('Failed to insert default floor data:', insertError);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Removed localStorage useEffects
+
 
   const handleSermonSelect = (sermon: Sermon) => {
     setSelectedSermon(sermon);
@@ -98,8 +147,6 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-<<<<<<< HEAD
-=======
   const handleAdminLoginSuccess = () => {
     setIsAdmin(true);
     localStorage.setItem('shinkwang_is_admin', 'true');
@@ -114,30 +161,20 @@ const App: React.FC = () => {
     }
   };
 
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
   const renderView = () => {
     switch (view) {
-      case ViewType.HOME: return <HomeScreen setView={setView} />;
+      case ViewType.HOME: return <HomeScreen setView={setView} pastorProfile={pastorProfile} floorData={floorData} />;
       case ViewType.BULLETIN: return <BulletinScreen bulletins={bulletins} />;
-<<<<<<< HEAD
       case ViewType.PROGRAM: return <ProgramScreen batches={programBatches} setBatches={setProgramBatches} />;
-=======
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       case ViewType.MEDIA: return <MediaScreen sermons={sermons} onSermonSelect={handleSermonSelect} />;
       case ViewType.MAP: return <MapScreen />;
       case ViewType.MORE: return <MoreScreen onSermonSelect={handleSermonSelect} setView={setView} />;
-      case ViewType.RESERVATION: return <ReservationScreen />;
+      case ViewType.RESERVATION: return <ReservationScreen reservations={reservations} setReservations={setReservations} setView={setView} />;
       case ViewType.AI_CHAT: return <AIChatScreen />;
       case ViewType.SITEMAP: return <SitemapScreen setView={setView} />;
       case ViewType.NOTICE: return <NoticeScreen />;
       case ViewType.SMALL_GROUP: return <SmallGroupScreen />;
       case ViewType.ALBUM: return <AlbumScreen />;
-<<<<<<< HEAD
-      case ViewType.ADMIN_LOGIN: return <AdminLoginScreen setView={setView} />;
-      case ViewType.ADMIN_DASHBOARD: 
-        return (
-          <AdminDashboardScreen 
-=======
       case ViewType.ADMIN_LOGIN:
         if (isAdmin) {
           // 이미 로그인된 상태라면 바로 대시보드로 이동
@@ -151,6 +188,8 @@ const App: React.FC = () => {
               praiseBands={praiseBands} setPraiseBands={setPraiseBands}
               departments={departments} setDepartments={setDepartments}
               reservations={reservations} setReservations={setReservations}
+              pastorProfile={pastorProfile} setPastorProfile={setPastorProfile}
+              floorData={floorData} setFloorData={setFloorData}
               onLogout={handleAdminLogout}
             />
           );
@@ -163,7 +202,6 @@ const App: React.FC = () => {
         }
         return (
           <AdminDashboardScreen
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
             setView={setView}
             sermons={sermons} setSermons={setSermons}
             bulletins={bulletins} setBulletins={setBulletins}
@@ -172,15 +210,14 @@ const App: React.FC = () => {
             praiseBands={praiseBands} setPraiseBands={setPraiseBands}
             departments={departments} setDepartments={setDepartments}
             reservations={reservations} setReservations={setReservations}
-<<<<<<< HEAD
-=======
+            pastorProfile={pastorProfile} setPastorProfile={setPastorProfile}
+            floorData={floorData} setFloorData={setFloorData}
             onLogout={handleAdminLogout}
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
           />
         );
       case ViewType.DETAIL:
         return selectedSermon ? (
-          <SermonDetailScreen sermon={selectedSermon} onSermonSelect={handleSermonSelect} />
+          <SermonDetailScreen sermon={selectedSermon} onSermonSelect={handleSermonSelect} allSermons={sermons} />
         ) : <MediaScreen sermons={sermons} onSermonSelect={handleSermonSelect} />;
       default: return <HomeScreen setView={setView} />;
     }
@@ -190,10 +227,7 @@ const App: React.FC = () => {
     switch (view) {
       case ViewType.HOME: return "성남신광교회";
       case ViewType.BULLETIN: return "온라인 주보";
-<<<<<<< HEAD
       case ViewType.PROGRAM: return "양육 프로그램";
-=======
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
       case ViewType.MEDIA: return "설교 미디어";
       case ViewType.MAP: return "오시는 길";
       case ViewType.MORE: return "더보기";
@@ -212,15 +246,9 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-navy-light dark:bg-navy-dark font-sans selection:bg-primary/30">
-<<<<<<< HEAD
-      <Layout 
-        currentView={view === ViewType.DETAIL ? ViewType.MEDIA : (view === ViewType.ADMIN_DASHBOARD || view === ViewType.ADMIN_LOGIN ? ViewType.MORE : view)} 
-        setView={setView} 
-=======
       <Layout
         currentView={view === ViewType.DETAIL ? ViewType.MEDIA : (view === ViewType.ADMIN_DASHBOARD || view === ViewType.ADMIN_LOGIN ? ViewType.MORE : view)}
         setView={setView}
->>>>>>> 81d2d6a97778cfb9e23c5eb89e8da9032ded794a
         title={getViewTitle()}
         showBack={view !== ViewType.HOME}
       >

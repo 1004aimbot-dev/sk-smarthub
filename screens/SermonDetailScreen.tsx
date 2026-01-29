@@ -6,9 +6,44 @@ import { MOCK_SERMONS } from '../constants';
 interface SermonDetailScreenProps {
   sermon: Sermon;
   onSermonSelect: (sermon: Sermon) => void;
+  allSermons?: Sermon[];
 }
 
-export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, onSermonSelect }) => {
+// 시간 문자열(MM:SS, HH:MM:SS)을 초 단위로 변환
+const timeToSeconds = (timeStr?: string): number | undefined => {
+  if (!timeStr) return undefined;
+  const parts = timeStr.split(':').map(Number);
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  return undefined;
+};
+
+// 유튜브 URL에서 Embed URL 생성 (시작/종료 시간 포함)
+const getYoutubeEmbedUrl = (url?: string, start?: string, end?: string) => {
+  if (!url) return undefined;
+
+  let videoId = '';
+  if (url.includes('youtu.be')) {
+    videoId = url.split('/').pop()?.split('?')[0] || '';
+  } else if (url.includes('youtube.com')) {
+    const urlObj = new URL(url);
+    videoId = urlObj.searchParams.get('v') || '';
+  }
+
+  if (!videoId) return url; // 비디오 ID 추출 실패 시 원본 반환
+
+  let embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`; // autoplay, rel=0(관련영상 최소화), modestbranding 추가
+
+  const startSeconds = timeToSeconds(start);
+  const endSeconds = timeToSeconds(end);
+
+  if (startSeconds !== undefined) embedUrl += `&start=${startSeconds}`;
+  if (endSeconds !== undefined) embedUrl += `&end=${endSeconds}`;
+
+  return embedUrl;
+};
+
+export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, onSermonSelect, allSermons }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteContent, setNoteContent] = useState('');
@@ -16,7 +51,9 @@ export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, 
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const recommendations = MOCK_SERMONS.filter(s => s.id !== sermon.id).slice(0, 2);
+  // MOCK 대신 실제 데이터를 사용, 없으면 MOCK 사용 (하위 호환)
+  const sourceSermons = allSermons && allSermons.length > 0 ? allSermons : MOCK_SERMONS;
+  const recommendations = sourceSermons.filter(s => s.id !== sermon.id).slice(0, 2);
 
   useEffect(() => {
     // 보관 상태 로드
@@ -93,12 +130,12 @@ export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, 
     if (isDownloading) return;
     setIsDownloading(true);
     setDownloadProgress(0);
-    
+
     const interval = setInterval(() => {
       setDownloadProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
-          
+
           const dummyData = new Blob(["오디오 데이터 시뮬레이션"], { type: "audio/mpeg" });
           const url = window.URL.createObjectURL(dummyData);
           const link = document.createElement('a');
@@ -141,12 +178,12 @@ export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, 
       {/* 영상 플레이어 영역 */}
       <div className="aspect-video bg-black w-full relative">
         {sermon.videoUrl ? (
-          <iframe 
-            src={sermon.videoUrl} 
+          <iframe
+            src={getYoutubeEmbedUrl(sermon.videoUrl, sermon.startTime, sermon.endTime)}
             className="w-full h-full"
             title={sermon.title}
-            frameBorder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           ></iframe>
         ) : (
@@ -173,26 +210,26 @@ export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, 
 
         {/* 액션 버튼 */}
         <div className="flex items-center gap-2 py-4 justify-between">
-          <ActionButton 
-            icon="share" 
-            label="공유하기" 
-            onClick={handleShare} 
+          <ActionButton
+            icon="share"
+            label="공유하기"
+            onClick={handleShare}
           />
-          <ActionButton 
-            icon="bookmark" 
-            label={isBookmarked ? "보관됨" : "보관하기"} 
+          <ActionButton
+            icon="bookmark"
+            label={isBookmarked ? "보관됨" : "보관하기"}
             active={isBookmarked}
-            onClick={toggleBookmark} 
+            onClick={toggleBookmark}
           />
-          <ActionButton 
-            icon="edit_note" 
-            label="말씀노트" 
+          <ActionButton
+            icon="edit_note"
+            label="말씀노트"
             active={!!noteContent}
-            onClick={() => setIsNoteOpen(true)} 
+            onClick={() => setIsNoteOpen(true)}
           />
-          <ActionButton 
-            icon={isDownloading ? "sync" : "download"} 
-            label={isDownloading ? `${downloadProgress}%` : "음원저장"} 
+          <ActionButton
+            icon={isDownloading ? "sync" : "download"}
+            label={isDownloading ? `${downloadProgress}%` : "음원저장"}
             onClick={() => startDownload(sermon.title)}
             loading={isDownloading}
           />
@@ -220,7 +257,7 @@ export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, 
             </div>
             <div className="flex flex-col gap-2">
               {sermon.attachments.map((file) => (
-                <div 
+                <div
                   key={file.id}
                   className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-navy-accent/50 rounded-2xl border border-gray-100 dark:border-white/5 group transition-all"
                 >
@@ -231,7 +268,7 @@ export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, 
                     <p className="text-sm font-bold text-navy-dark dark:text-gray-200 truncate">{file.title}</p>
                     <p className="text-[10px] text-gray-400 font-medium">{file.type} · {file.size}</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => startDownload(file.title)}
                     className="size-10 rounded-full bg-white dark:bg-navy-dark flex items-center justify-center text-gray-400 hover:text-primary hover:border-primary/50 border border-gray-100 dark:border-white/5 active:scale-90 transition-all shadow-sm"
                   >
@@ -250,8 +287,8 @@ export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, 
           <h3 className="font-bold text-navy-dark dark:text-white text-base">추천 말씀</h3>
           <div className="flex flex-col gap-3">
             {recommendations.map(item => (
-              <div 
-                key={item.id} 
+              <div
+                key={item.id}
                 onClick={() => onSermonSelect(item)}
                 className="flex gap-4 bg-gray-50 dark:bg-navy-accent/50 p-3 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-navy-accent transition-colors border border-transparent hover:border-primary/10 active:scale-[0.98]"
               >
@@ -285,20 +322,20 @@ export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, 
                   <span className="material-symbols-outlined text-gray-400">close</span>
                 </button>
               </div>
-              <textarea 
+              <textarea
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
                 placeholder="말씀을 통해 받은 은혜와 결단을 기록해보세요..."
                 className="w-full h-48 bg-gray-50 dark:bg-navy-accent border-none rounded-2xl p-4 text-sm font-medium dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary shadow-inner resize-none"
               ></textarea>
               <div className="grid grid-cols-2 gap-3 mt-6">
-                <button 
+                <button
                   onClick={() => setIsNoteOpen(false)}
                   className="py-4 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-500 font-black text-sm active:scale-95 transition-all"
                 >
                   취소
                 </button>
-                <button 
+                <button
                   onClick={saveNote}
                   className="py-4 rounded-2xl bg-primary text-navy-dark font-black text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all"
                 >
@@ -314,15 +351,14 @@ export const SermonDetailScreen: React.FC<SermonDetailScreenProps> = ({ sermon, 
 };
 
 const ActionButton: React.FC<{ icon: string; label: string; onClick: () => void; active?: boolean; loading?: boolean }> = ({ icon, label, onClick, active, loading }) => (
-  <button 
+  <button
     onClick={onClick}
     className="flex flex-col items-center gap-1.5 flex-1 group active:scale-90 transition-transform"
   >
-    <div className={`size-14 rounded-full flex items-center justify-center transition-all border border-transparent ${
-      active 
-        ? 'bg-primary/20 text-primary border-primary/30' 
-        : 'bg-[#F8FAFC] dark:bg-navy-accent text-gray-500 group-hover:bg-primary/5 group-hover:text-primary border-gray-100 dark:border-white/5 shadow-sm'
-    }`}>
+    <div className={`size-14 rounded-full flex items-center justify-center transition-all border border-transparent ${active
+      ? 'bg-primary/20 text-primary border-primary/30'
+      : 'bg-[#F8FAFC] dark:bg-navy-accent text-gray-500 group-hover:bg-primary/5 group-hover:text-primary border-gray-100 dark:border-white/5 shadow-sm'
+      }`}>
       <span className={`material-symbols-outlined text-[24px] ${active ? 'filled' : ''} ${loading ? 'animate-spin' : ''}`}>
         {icon}
       </span>
