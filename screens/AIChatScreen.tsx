@@ -113,15 +113,15 @@ export const AIChatScreen: React.FC = () => {
 
   const generateDailyReflection = async () => {
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
-      if (!apiKey || apiKey.includes('PLACEHOLDER')) throw new Error("API Key Missing");
+      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '').replace(/['"]/g, '');
+      if (!apiKey || apiKey === 'undefined' || apiKey === 'null' || apiKey.includes('PLACEHOLDER')) throw new Error("API Key Missing");
 
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
       const result = await model.generateContent(`성경 구절: "${todayVerse.text} (${todayVerse.ref})". 
         이 구절을 바탕으로 성도님에게 전하는 매우 따뜻하고 격려가 되는 짧은 묵상 노트를 작성해줘. 
-        최대 2줄로 작성하고, "오늘의 묵상:"으로 시작해. 정중하고 은혜로운 한국어(존댓말)를 사용해.`);
+        최대 2줄로 작성하고, "오늘의 말씀 묵상입니다."로 시작해. 정중하고 은혜로운 한국어(존댓말)를 사용해.`);
 
       setDailyReflection(result.response.text() || "주님의 은혜가 오늘 하루 성도님의 삶에 가득하시길 소망합니다.");
     } catch (e) {
@@ -145,8 +145,8 @@ export const AIChatScreen: React.FC = () => {
     if (!trimmedText || isLoading || isGeneratingImages) return;
 
     // API Key Validation
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
-    if (!apiKey || apiKey.trim() === '' || apiKey.includes('PLACEHOLDER')) {
+    const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '').replace(/['"]/g, '');
+    if (!apiKey || apiKey === 'undefined' || apiKey === 'null' || apiKey.trim() === '' || apiKey.includes('PLACEHOLDER')) {
       setMessages(prev => [...prev, { role: 'user', text: trimmedText }]);
       setInput('');
       setTimeout(() => {
@@ -253,7 +253,7 @@ export const AIChatScreen: React.FC = () => {
         <div className="flex gap-2 overflow-x-auto no-scrollbar px-1">
           <button onClick={() => handleSend("마음이 힘들어요")} className="shrink-0 bg-gray-50 dark:bg-navy-dark border border-gray-100 dark:border-white/5 px-4 py-2 rounded-full text-[11px] font-black text-gray-500 dark:text-gray-400 hover:border-primary/50 hover:text-primary transition-all active:scale-95 shadow-sm">😢 힘들어요</button>
           <button onClick={() => handleSend("은혜로운 말씀을 들려주세요")} className="shrink-0 bg-gray-50 dark:bg-navy-dark border border-gray-100 dark:border-white/5 px-4 py-2 rounded-full text-[11px] font-black text-gray-500 dark:text-gray-400 hover:border-primary/50 hover:text-primary transition-all active:scale-95 shadow-sm">🙏 은혜를 구합니다</button>
-          <button onClick={() => handleSend("오늘의 말씀 묵상해줘")} className="shrink-0 bg-gray-50 dark:bg-navy-dark border border-gray-100 dark:border-white/5 px-4 py-2 rounded-full text-[11px] font-black text-gray-500 dark:text-gray-400 hover:border-primary/50 hover:text-primary transition-all active:scale-95 shadow-sm">📖 말씀 묵상</button>
+          <button onClick={() => handleSend("오늘의 말씀 묵상입니다.")} className="shrink-0 bg-gray-50 dark:bg-navy-dark border border-gray-100 dark:border-white/5 px-4 py-2 rounded-full text-[11px] font-black text-gray-500 dark:text-gray-400 hover:border-primary/50 hover:text-primary transition-all active:scale-95 shadow-sm">📖 말씀 묵상</button>
         </div>
 
         <div className="flex items-center gap-2 bg-gray-50 dark:bg-navy-dark rounded-[2rem] px-5 py-1 border border-gray-200 dark:border-white/5 shadow-inner">
