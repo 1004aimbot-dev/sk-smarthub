@@ -113,7 +113,7 @@ export const AIChatScreen: React.FC = () => {
 
   const generateDailyReflection = async () => {
     try {
-      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '').replace(/['"]/g, '');
+      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY || '').replace(/['"]/g, '').trim();
       if (!apiKey || apiKey === 'undefined' || apiKey === 'null' || apiKey.includes('PLACEHOLDER')) throw new Error("API Key Missing");
 
       const genAI = new GoogleGenerativeAI(apiKey);
@@ -145,8 +145,8 @@ export const AIChatScreen: React.FC = () => {
     if (!trimmedText || isLoading || isGeneratingImages) return;
 
     // API Key Validation
-    const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '').replace(/['"]/g, '');
-    if (!apiKey || apiKey === 'undefined' || apiKey === 'null' || apiKey.trim() === '' || apiKey.includes('PLACEHOLDER')) {
+    const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY || '').replace(/['"]/g, '').trim();
+    if (!apiKey || apiKey === 'undefined' || apiKey === 'null' || apiKey === '' || apiKey.includes('PLACEHOLDER')) {
       setMessages(prev => [...prev, { role: 'user', text: trimmedText }]);
       setInput('');
       setTimeout(() => {
