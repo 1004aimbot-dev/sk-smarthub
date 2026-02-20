@@ -31,7 +31,7 @@ const AVAILABLE_ROOMS: Room[] = [
   { id: '405', floor: '4층', name: '비전홀 405호 (미디어실)', desc: '4층 영상 편집실', thumbnail: 'https://picsum.photos/seed/room405/200/200' },
 ];
 
-const MAX_DURATION_MINUTES = 120; // 최대 2시간
+const MAX_DURATION_MINUTES = 60; // 최대 1시간
 
 interface ReservationScreenProps {
   reservations: ReservationData[];
@@ -45,7 +45,7 @@ export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservatio
   const [selectedRoom, setSelectedRoom] = useState<Room>(AVAILABLE_ROOMS[0]);
   const [date, setDate] = useState(getTodayString());
   const [startTime, setStartTime] = useState("10:00");
-  const [endTime, setEndTime] = useState("12:00");
+  const [endTime, setEndTime] = useState("11:00"); // Default 1 hour
   const [headcount, setHeadcount] = useState(5);
   const [applicantName, setApplicantName] = useState('');
   const [purpose, setPurpose] = useState('');
@@ -81,8 +81,8 @@ export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservatio
     return `${ampm} ${h12}:${String(m).padStart(2, '0')}`;
   };
 
-  // 타임라인 위치 계산 (07:00 ~ 23:00)
-  const START_H = 7;
+  // 타임라인 위치 계산 (04:00 ~ 23:00)
+  const START_H = 4;
   const END_H = 23;
   const RANGE_MIN = (END_H - START_H) * 60;
 
@@ -119,10 +119,10 @@ export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservatio
         return;
       }
 
-      // 2시간 제한 체크
+      // 1시간 제한 체크
       const duration = timeToMinutes(newTime) - timeToMinutes(startTime);
       if (duration > MAX_DURATION_MINUTES) {
-        alert('최대 이용 시간은 2시간(120분)입니다. 시간을 다시 조정해주세요.');
+        alert('최대 이용 시간은 1시간(60분)입니다. 시간을 다시 조정해주세요.');
         return;
       }
 
@@ -150,7 +150,7 @@ export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservatio
       const isOverlap = existingReservations.some(res => newTime >= res.startTime && newTime < res.endTime);
       if (isOverlap) return;
 
-      // 2시간 제한 체크
+      // 1시간 제한 체크
       const duration = timeToMinutes(endTime) - newMin;
       if (duration > MAX_DURATION_MINUTES) return;
 
@@ -165,7 +165,7 @@ export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservatio
       const isOverlap = existingReservations.some(res => startTime < res.endTime && newTime > res.startTime);
       if (isOverlap) return;
 
-      // 2시간 제한 체크
+      // 1시간 제한 체크
       const duration = newMin - timeToMinutes(startTime);
       if (duration > MAX_DURATION_MINUTES) return;
 
@@ -183,7 +183,7 @@ export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservatio
     // 최종 이용 시간 체크
     const duration = timeToMinutes(endTime) - timeToMinutes(startTime);
     if (duration > MAX_DURATION_MINUTES) {
-      alert('공간 이용 시간은 최대 2시간까지 가능합니다.');
+      alert('공간 이용 시간은 최대 1시간까지 가능합니다.');
       return;
     }
 
@@ -309,6 +309,9 @@ export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservatio
 
       {/* 2. 인터랙티브 타임라인 */}
       <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-black text-navy-dark dark:text-white tracking-tight">비전센터 사용시간 <span className="text-sm font-bold text-gray-400 ml-2">(04:00 ~ 23:00)</span></h2>
+        </div>
         <div className="flex items-center justify-between px-1">
           <label className="text-xs font-black text-gray-400 uppercase tracking-widest">
             {selectionStep === 'START' ? '① 시작 시간을 선택하세요' : '② 종료 시간을 선택하세요'}
@@ -325,7 +328,7 @@ export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservatio
         <div className="bg-white dark:bg-navy-accent rounded-[2.5rem] p-8 shadow-xl border border-primary/10 relative">
           <div className="mb-4 text-center">
             <span className="text-[10px] font-bold text-red-400/80 bg-red-50 dark:bg-red-900/20 px-3 py-1 rounded-full border border-red-100 dark:border-red-900/30">
-              ⚠️ 한 세션당 최대 2시간까지만 이용 가능합니다.
+              ⚠️ 한 세션당 최대 1시간까지만 이용 가능합니다.
             </span>
           </div>
           <div
@@ -366,7 +369,7 @@ export const ReservationScreen: React.FC<ReservationScreenProps> = ({ reservatio
           </div>
 
           <div className="flex justify-between mt-4 px-3 text-[10px] font-black text-gray-400">
-            <span>07시</span><span>11시</span><span>15시</span><span>19시</span><span>23시</span>
+            <span>04시</span><span>09시</span><span>14시</span><span>19시</span><span>23시</span>
           </div>
 
           <div className="mt-8 flex flex-col gap-4">

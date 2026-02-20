@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ChatMessage } from '../types';
 
 // 오늘의 말씀 리스트 (날짜에 따라 순환)
@@ -113,14 +113,17 @@ export const AIChatScreen: React.FC = () => {
 
   const generateDailyReflection = async () => {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `성경 구절: "${todayVerse.text} (${todayVerse.ref})". 
+      const apiKey = process.env.API_KEY || '';
+      if (!apiKey || apiKey.includes('PLACEHOLDER')) throw new Error("API Key Missing");
+
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+
+      const result = await model.generateContent(`성경 구절: "${todayVerse.text} (${todayVerse.ref})". 
         이 구절을 바탕으로 성도님에게 전하는 매우 따뜻하고 격려가 되는 짧은 묵상 노트를 작성해줘. 
-        최대 2줄로 작성하고, "오늘의 묵상:"으로 시작해. 정중하고 은혜로운 한국어(존댓말)를 사용해.`,
-      });
-      setDailyReflection(response.text || "주님의 은혜가 오늘 하루 성도님의 삶에 가득하시길 소망합니다.");
+        최대 2줄로 작성하고, "오늘의 묵상:"으로 시작해. 정중하고 은혜로운 한국어(존댓말)를 사용해.`);
+
+      setDailyReflection(result.response.text() || "주님의 은혜가 오늘 하루 성도님의 삶에 가득하시길 소망합니다.");
     } catch (e) {
       setDailyReflection("오늘 하루도 주님의 사랑 안에서 평안하시길 기도합니다.");
     }
@@ -141,70 +144,57 @@ export const AIChatScreen: React.FC = () => {
     const trimmedText = text.trim();
     if (!trimmedText || isLoading || isGeneratingImages) return;
 
+    // API Key Validation
+    const apiKey = process.env.API_KEY || ''; // Ensure it's a string
+    if (!apiKey || apiKey.trim() === '' || apiKey.includes('PLACEHOLDER')) {
+      setMessages(prev => [...prev, { role: 'user', text: trimmedText }]);
+      setInput('');
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          role: 'model',
+          text: "⚠️ API 키가 설정되지 않았습니다.\n.env.local 파일의 GEMINI_API_KEY를 확인해주세요."
+        }]);
+      }, 500);
+      return;
+    }
+
     setMessages(prev => [...prev, { role: 'user', text: trimmedText }]);
     setInput('');
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: trimmedText,
-        config: {
-          systemInstruction: `당신은 성남신광교회 성경 길잡이입니다. 
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: "gemini-3-flash-preview",
+        systemInstruction: `당신은 성남신광교회 성경 길잡이입니다. 
           사용자 정보: 이름(${userName || '성도'}), 직분(${userPosition || '성도'}). 
           상담 목적: 고민 상담, 성경 공부, 신앙 권면.
           사용자의 이름과 직분을 인지하고, 대화 중에 적절히 호칭을 사용하세요.
           답변은 성경 구절을 인용하여 따뜻하고 지혜롭게 하세요. 
           우리 교회의 담임목사님은 이현용 목사님입니다.
-          말투는 정중한 기독교적 어조를 사용하세요.`,
-        }
+          말투는 정중한 기독교적 어조를 사용하세요.`
       });
 
-      const responseText = response.text || "말씀을 전해드리지 못해 죄송합니다. 잠시 후 다시 시도해 주세요.";
+      const result = await model.generateContent(trimmedText);
+      const response = await result.response;
+      const responseText = response.text() || "말씀을 전해드리지 못해 죄송합니다. 잠시 후 다시 시도해 주세요.";
+
       setMessages(prev => [...prev, { role: 'model', text: responseText }]);
       setIsLoading(false);
-      await generateBibleIllustrations(trimmedText, responseText);
-    } catch (error) {
+      // await generateBibleIllustrations(trimmedText, responseText); // Disable image generation for now to stabilize chat
+    } catch (error: any) {
       console.error("AI 오류:", error);
       setIsLoading(false);
-      setMessages(prev => [...prev, { role: 'model', text: "통신 오류가 발생했습니다. 성도님의 넓은 이해를 부탁드립니다." }]);
+      const errorMessage = error.message || "통신 오류가 발생했습니다.";
+      const debugKey = apiKey ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` : "KEY_MISSING";
+      setMessages(prev => [...prev, { role: 'model', text: `죄송합니다. 오류가 발생했습니다.\n사용된 키: ${debugKey}\n모델: gemini-3-flash-preview\n에러: ${errorMessage}\n(${error.statusText || error.code || 'UNKNOWN'})` }]);
     }
   };
 
   const generateBibleIllustrations = async (userPrompt: string, aiResponse: string) => {
-    setIsGeneratingImages(true);
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const promptOptimizer = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `다음을 바탕으로 성경적인 일러스트를 위한 영어 프롬프트를 하나 만들어줘: "${userPrompt}". 
-        부드럽고, 거룩하며, 빛이 가득한 느낌이어야 함. 프롬프트 텍스트만 출력해.`,
-      });
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: { parts: [{ text: promptOptimizer.text?.trim() || "Biblical illustration, soft sacred light" }] },
-        config: { imageConfig: { aspectRatio: "1:1" } }
-      });
-      const generatedImages: string[] = [];
-      if (response.candidates?.[0]?.content?.parts) {
-        for (const part of response.candidates[0].content.parts) {
-          if (part.inlineData) generatedImages.push(`data:image/png;base64,${part.inlineData.data}`);
-        }
-      }
-      if (generatedImages.length > 0) {
-        setMessages(prev => {
-          const newMessages = [...prev];
-          const last = newMessages[newMessages.length - 1];
-          if (last && last.role === 'model') last.images = generatedImages;
-          return newMessages;
-        });
-      }
-    } catch (error) {
-      console.error("이미지 생성 오류:", error);
-    } finally {
-      setIsGeneratingImages(false);
-    }
+    // Image generation logic needs update too if using new SDK, but disabled for now
+    // leaving placeholder to avoid breaking structure if re-enabled later
+    setIsGeneratingImages(false);
   };
 
   return (

@@ -84,6 +84,12 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
           error = bandErr;
           if (!error) setPraiseBands(prev => prev.filter(pb => String(pb.id) !== idStr));
           break;
+        case 'FLOOR_ROOMS':
+          const { error: floorErr } = await supabase.from('floor_data').delete().eq('id', idStr);
+          error = floorErr;
+          // Local state update is handled optimistically in usage, but good to have here too if called directly
+          if (!error) setFloorData(prev => prev.filter(f => String(f.id) !== idStr));
+          break;
       }
 
       if (error) {
