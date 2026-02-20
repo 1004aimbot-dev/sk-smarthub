@@ -113,7 +113,7 @@ export const AIChatScreen: React.FC = () => {
 
   const generateDailyReflection = async () => {
     try {
-      const apiKey = process.env.API_KEY || '';
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
       if (!apiKey || apiKey.includes('PLACEHOLDER')) throw new Error("API Key Missing");
 
       const genAI = new GoogleGenerativeAI(apiKey);
@@ -145,14 +145,14 @@ export const AIChatScreen: React.FC = () => {
     if (!trimmedText || isLoading || isGeneratingImages) return;
 
     // API Key Validation
-    const apiKey = process.env.API_KEY || ''; // Ensure it's a string
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
     if (!apiKey || apiKey.trim() === '' || apiKey.includes('PLACEHOLDER')) {
       setMessages(prev => [...prev, { role: 'user', text: trimmedText }]);
       setInput('');
       setTimeout(() => {
         setMessages(prev => [...prev, {
           role: 'model',
-          text: "⚠️ API 키가 설정되지 않았습니다.\n.env.local 파일의 GEMINI_API_KEY를 확인해주세요."
+          text: "⚠️ API 키가 설정되지 않았습니다.\n\n1. .env.local 파일의 VITE_GEMINI_API_KEY를 확인해주세요.\n2. Cloudflare Pages 설정에서 환경 변수를 추가했는지 확인해주세요."
         }]);
       }, 500);
       return;
